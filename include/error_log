@@ -1,0 +1,4 @@
+[24-May-2022 03:48:36 UTC] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home1/globa7ox/Newlands Pharmacy.com/include/sidenav.php:26
+Stack trace:
+#0 {main}
+  thrown in /home1/globa7ox/Newlands Pharmacy.com/include/sidenav.php on line 26

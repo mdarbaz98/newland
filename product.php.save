@@ -1,0 +1,554 @@
+ <?php
+  include('include/database.php');
+  setcookie("userID");
+  // echo "<script>alert('".$_COOKIE["userID"]."');</script>";
+  error_reporting(0);
+    if(!isset($_COOKIE["userID"])) {
+        setcookie("userID",uniqid(),time()+31556926 ,'/');
+    } else {
+        setcookie("userID",$_COOKIE["userID"],time()+31556926 ,'/');
+    }
+  $product_slug =   $_GET['product_slug'];
+  if(empty($product_slug)){
+    header('location: shop.php');
+  }
+  $select_product=$conn->prepare("SELECT productName, productCategory FROM ogproduct WHERE productSlug=?");
+      $select_product->execute([$product_slug]);  
+      $row=$select_product->rowCount();
+      while($row=$select_product->fetch(PDO::FETCH_ASSOC))
+      {
+        $productName = $row['productName'];
+        $productCategory = $row['productCategory'];
+        $productDetails = $row['productDescription'];
+      }
+      if(strpos($productCategory,'Steroids')>0){
+        $shiptime = '12 to 18 Days Standard Delivery';
+        $info = '<button type="button" 
+                class="" data-bs-container="body" 
+                data-bs-toggle="popover" data-bs-placement="top" 
+                data-bs-trigger="hover" 
+                title="" 
+                data-bs-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus ornare sem." 
+                data-bs-original-title="Popover on hover" 
+                aria-label="Popover on hover" 
+                style="font-size: 18px; border: 0px;background: #fff;margin: 3px 0px 0px 5px !important;">
+                <i class="ci-announcement" style="font-size: 18px;margin-bottom: -1px !important;"></i></button>';
+      }
+      elseif(strpos($productName,'USA to USA')>0) {
+        $altProName = trim(str_replace('USA to USA', '', $productName));
+
+        $proSql = "SELECT * FROM ogproduct WHERE productName='".$altProName."' OR (productName LIKE '%".$altProName."%' AND  productName LIKE '%Express%')";
+
+        $shiptime = '5 to 7 Days USA to USA Shipping';
+        $info = '<button type="button" 
+                class="" 
+                data-bs-container="body" 
+                data-bs-toggle="popover" 
+                data-bs-placement="top" 
+                data-bs-trigger="hover" 
+                title="" 
+                data-bs-content="Medicines will be shipped from USA, prompt delivery, but slightly higher prices." 
+                data-bs-original-title="USA to USA" 
+                aria-label="Popover on hover" 
+                style="font-size: 18px; border: 0px;background: #fff;margin: 3px 0px 0px 5px !important;"><i class="ci-announcement" style="font-size: 18px;margin-bottom: -1px !important;"></i></button>';
+      }
+      elseif(strpos($productName,'Express')>0) {
+        $altProName = trim(str_replace('Express', '', $productName));
+        $proSql = "SELECT * FROM ogproduct WHERE productName='".$altProName."' OR (productName LIKE '%".$altProName."%' AND  productName LIKE '%USA to USA%')";
+
+        $shiptime = '10 Days Delivery';
+        $info = '<button type="button" 
+                class="" 
+                data-bs-container="body" 
+                data-bs-toggle="popover" 
+                data-bs-placement="top" 
+                data-bs-trigger="hover" 
+                title="" 
+                data-bs-content="Medicines will be shipped from UK, cheaper than USA to USA & faster delivery than Standard shipping" 
+                data-bs-original-title="Express Shipping" 
+                aria-label="Popover on hover" 
+                style="font-size: 18px; border: 0px;background: #fff;margin: 3px 0px 0px 5px !important;"><i class="ci-announcement" style="font-size: 18px;margin-bottom: -1px !important;"></i></button>';
+      }
+      else {
+        $altProName = trim($productName);
+        $proSql = "SELECT * FROM ogproduct WHERE productName LIKE '%".$altProName."%' AND (productName LIKE '%Express%' OR  productName LIKE '%USA to USA%')";
+
+        $shiptime = '12 to 18 Days Standard Delivery';
+        $info = '<button type="button" 
+                class="" 
+                data-bs-container="body" 
+                data-bs-toggle="popover" 
+                data-bs-placement="top" 
+                data-bs-trigger="hover" 
+                title="" 
+                data-bs-content="Medicines will be shipped from India, chepaer than USA to USA, but more shipping time." 
+                data-bs-original-title="Standard Shipping" 
+                aria-label="Popover on hover" 
+                style="font-size: 18px; border: 0px;background: #fff;margin: 3px 0px 0px 5px !important;"><i class="ci-announcement" style="font-size: 18px;margin-bottom: -1px !important;"></i></button>';
+      }
+      $productSeoTitle = $productName;
+      $productSeoDescription = $productDetails;
+      
+?>
+    <?php include('include/header.php'); ?>
+    <?php 
+      include('include/sidenav.php'); 
+      $select_product=$conn->prepare("SELECT * FROM ogproduct WHERE productSlug=?");
+      $select_product->execute([$product_slug]);  
+      $row=$select_product->rowCount();
+      while($row=$select_product->fetch(PDO::FETCH_ASSOC))
+      {
+        $productName = $row['productName'];
+        $productCode = $row['productCode'];
+        $bestseller = $row['bestseller'];
+        $productCategory = $row['productCategory'];
+        $productlower = strtolower($productCategory);
+        $prductcategoryslug = str_replace(" ","-",$productlower);
+        $productDetails = $row['productDescription'];
+        $productDetails = $row['productDescription'];
+                                $productImage = $row['productImage'];
+                                if(strlen($productImage)>2 AND $productImage!='assets/images/products/'){
+                                  $productImage = $row['productImage'];
+                                }else {
+                                  $productImage = 'defaultMed.png';
+                                }
+        $productImageAlt = $row['productImageAlt'];
+        $productImageTitle = $row['productImageTitle'];
+        $productType = $row['productType'];
+        $productDiscount = $row['productDiscount'];
+        $productSeoTitle = $row['productSeoTitle'];
+        $productSeoDescription = $row['productDescription'];
+        
+        
+        $pageName = "ProductPage";
+        
+      }
+    ?>
+    <input type="hidden" id="productPageName" value="<?php echo $pageName ?>">
+    <input type="hidden" id="productNewCode" value="<?php echo $productCode ?>">
+    
+  
+    <!--<section class="prdt-cart-sticky">-->
+      
+    <!--</section>-->
+
+    <main class="offcanvas-enabled" style="padding-top: 5rem;">
+      <section class="ps-lg-4 pe-lg-3 pt-4">
+        <div class="px-3 pt-2">
+          <!-- Page title + breadcrumb-->
+          <nav class="mb-4" aria-label="breadcrumb">
+            <ol class="breadcrumb flex-lg-nowrap">
+             <?php
+                $protocol = strpos(strtolower($_SERVER['SERVER_PROTOCOL']), 'https') === FALSE ? 'http' : 'https';
+                $domainLink = $protocol . '://' . $_SERVER['HTTP_HOST'];
+             ?>
+              <li class="breadcrumb-item"><a class="text-nowrap" href="<?php echo $domainLink; ?>"><i class="fa-solid fa-house"></i>Home</a></li>
+              <li class="breadcrumb-item1 text-nowrap"><a href="<?php echo $prductcategoryslug; ?>"><?php echo $productCategory;?></a>
+              </li>
+              <li class="breadcrumb-item text-nowrap active" aria-current="page"><?php echo $productName; ?></li>
+            </ol>
+          </nav>
+          <!-- Content-->
+          <!-- Product Gallery + description-->
+          <section class="row g-0 mx-n2 pb-5 mb-xl-3" style="background:#fff !important;">
+            <div class="col-xl-4 px-2 mb-3 product_image">
+              <!--<div class="offer">-->
+              <!--  <img src="images/offer1.png" style="width: 96px !important;">-->
+              <!--</div>-->
+              <div class="h-100 bg-light rounded-3">
+                <div class="product-gallery">
+                  <div class="product-gallery-preview order-sm-2">
+                    <div class="product-gallery-preview-item active" id="first">
+                      <img class="image-zoom" src="https://myglobal1.gumlet.io/onglobaladmincrm/<?php echo $productImage ?>?w=502" alt="Product image">
+                    </div>
+                    <?php
+                        $select_product_image=$conn->prepare("SELECT * FROM ogproductimage WHERE productImageCode='$productCode'");
+                        $select_product_image->execute();
+                        while($row=$select_product_image->fetch(PDO::FETCH_ASSOC))
+                        {
+                          $image_location = $row['productImagePath']; 
+                          $image_id = $row['productImageId'];
+                    ?>
+                    <div class="product-gallery-preview-item" id="image<?php echo $image_id; ?>">
+                      <img src="onglobaladmincrm/<?php echo $image_location; ?>" alt="Product image">
+                    </div>
+                    <?php
+                        }
+                    ?>
+                  </div>
+                  <div class="product-gallery-thumblist order-sm-1 d-lg-flex d-md-flex justify-content-center">
+                    <a class="product-gallery-thumblist-item active" href="#first"><img src="onglobaladmincrm/<?php echo $productImage ?>" alt="Product thumb"></a>
+                    
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6 px-2 mb-3" style="border-left: 1px solid #ebebeb !important;">
+              <div class="h-100 bg-light rounded-3 py-4 px-lg-3">
+                <?php
+                    if(strlen($bestseller)>0){
+                ?>
+                <div class="tag">
+                  <span class="badge bg-primary">Bestseller</span>
+                </div>
+                <?php
+                    }
+                ?>
+                <?php
+                     $select_product_price=$conn->prepare("SELECT * FROM ogproductingredient WHERE productCode='$productCode'");
+                    $select_product_price->execute();
+                    $totalAlt = $select_product_price->rowCount();
+                    if($totalAlt>0){
+                ?>
+                <small class="text-accent">Active Ingredient : &nbsp;</small>
+                
+                <?php
+                    $select_product_price=$conn->prepare("SELECT * FROM ogproductingredient WHERE productCode='$productCode' ");
+                    $select_product_price->execute();
+                    while($row=$select_product_price->fetch(PDO::FETCH_ASSOC))
+                    {
+                        $ingname = $row['productIngredientName'];
+                ?>
+                <a class="product-meta fs-sm pb-2 text-dark" href="ingredient/<?php echo strtolower(str_replace(' ', '-', $ingname)); ?>"><?php  echo $row['productIngredientName']?> </a>
+                <?php
+                    }
+                    }
+                ?>
+                <h1 style="display: flex;align-items: center;" class="h2 mb-0 pb-0"><?php echo $productName; ?> 
+                <span><i class="h2 text-body ci-loudspeaker" style="font-size: 17px; color: #e91e63 !important; padding: 5px 7px; border-radius: 5px; margin-left: 4px; font-weight: bolder;" id="playSound"></i></span></h1>
+                <div class="playSound">
+                <p>
+                        <input type="hidden" id="productReadName" value="<?php echo $productName ?>"></input>
+                </p>
+                <p>
+                        <input type="hidden"  id="volume" value="1"></input>
+                </p>
+                <p>
+                        <input type="hidden" id="rate" value="1"></input>
+                </p>
+                <p>
+                        <input type="hidden" id="pitch" value="1"></input>
+                </p>
+                <p>
+                        <select type="hidden" id="hidden" style="display:none;"></select>
+                </p>
+                </div>
+                <a href="<?php echo $prductcategoryslug; ?>" style="color: #f01117 !important;"><small><?php echo $productCategory; ?></small></a>
+                <?php
+                     $select_product_price=$conn->prepare("SELECT * FROM ogproductaltname WHERE productCode='$productCode' ");
+                    $select_product_price->execute();
+                    $totalAlt = $select_product_price->rowCount();
+                    if($totalAlt>0){
+                ?>
+                <br>
+                <small class="text-accent" style="color: #000 !important;">Other brand names : &nbsp;</small>
+                
+                <?php
+                   
+                        $select_product_price=$conn->prepare("SELECT * FROM ogproductaltname WHERE productCode='$productCode' ");
+                        $select_product_price->execute();
+                        while($row=$select_product_price->fetch(PDO::FETCH_ASSOC))
+                        {
+                            $altname = $row['productAltName'];
+                ?>
+                <a class="product-meta fs-sm pb-2 text-dark" style="color: #119385 !important;font-weight: 700;" href="brand/<?php echo strtolower(str_replace(' ', '-', $altname)); ?>"><?php  echo $row['productAltName']?> </a>, 
+                <?php
+                        }
+                    }
+                ?>
+                
+                <!--<p class="text-success mt-1">Special Price</p>-->
+                <?php
+                    $select_product_price=$conn->prepare("SELECT * FROM ogquantity WHERE productCode='$productCode' ORDER BY price ASC limit 1");
+                    $select_product_price->execute();
+                    while($row=$select_product_price->fetch(PDO::FETCH_ASSOC))
+                    {
+                        $price = $row['price']; 
+                    }
+                ?>
+		<div class="spbox" style="display: flex;flex-direction: row;">
+			<div class="pricingbox">
+                		<div class="h4 fw-normal mt-1 mb-0">$<?php echo $price; ?><small>/<?php echo $productType; ?></small></div>
+                		<div style="display: flex;align-items: center;"><span class="pro-ship-time"><?php echo $shiptime?></span><?php echo $info ?></div>
+                		<!--<small>Get the best price on this product on orders above $650</small><br>-->
+                		<small class="align-middle"> <img src="images/fast.png" width="20px"> Free shipping on order above <span class="text-primary">$250</span></small>
+                	</div>
+			<div class="regbox" style="display: flex;align-items: center;padding-left: 27px;">
+				<a href="https://www.pharmacyregulation.org/registers/pharmacy/registrationnumber/1031217" target="_blank"><img src="https://myglobal1.gumlet.io/images/logo/Registered-Pharmacy-Logo.jpg?w=118"></a>
+			</div>
+		</div>
+                <?php
+                    $selectAlt = $conn->prepare($proSql);
+                    $selectAlt->execute();
+                    while($altRow=$selectAlt->fetch(PDO::FETCH_ASSOC)){
+			$productCategory = $altRow['productCategory'];
+               		$productlower = strtolower($productCategory);
+                        $prductcategoryslug = str_replace(" ","-",$productlower);
+                        $productSlug = $altRow['productSlug'];
+			if(strpos($productCategory,'Express')>0){
+                                      $altship = 'Express 10 Days Shipping';
+                        }
+                        elseif(strpos($productName,'USA to USA')>0) {
+                            $altship = 'USA to USA 7-9 Days Shipping'                                    }
+                                    else {
+                                      $altship = 'Standard 18-21 Days Shipping';
+                                    }
+                ?>
+                <a class="alt-med-box" href="<?php echo $prductcategoryslug.'/'.$productSlug; ?>">
+                    <img src="onglobaladmincrm/assets/images/products/Voveran SR.png" alt="Product thumb" class="alt-image">
+                    <div class="proinf">
+                            <h3><?php echo $altRow['productName']; ?></h3>
+                            <p style="font-size: 11px;"><?php echo $altship; ?></p>
+                    </div>
+                </a>
+		<?php
+                	}
+		?>
+                <!--<p class="rate"><span class="badge rounded-pill bg-success py-1 my-2">4.1 <i class="ci-star-filled"></i> </span> 25 ratings and 10 reviews</p>-->
+                <div id="tabular" class="mt-3 listStrength">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/kvsszuvz.json"
+                        trigger="loop"
+                        colors="primary:#121331,secondary:#08a88a"
+                        stroke="58"
+                        scale="100"
+                        style="width: 300px;height: 36px;display: block;margin: 0 auto;">
+                    </lord-icon>
+                    <p class="text-center">Loading Strength...</p>
+                </div>
+                
+                
+                <p class="product-varient-error py-2"></p>
+                <h6>Product description</h6>
+                <p><?php echo $productDetails; ?></p>
+                <!--<h6 class="mt-3 mb-0 pb-2">Also Available</h6>-->
+                <!--  <div class="also-availbale mb-2">-->
+                <!--    <img src="images/Levitra-Medicine-Box-th1.jpg" class="" width="60px" alt="Product thumb">-->
+                <!--    <div class="details text-left d-flex flex-column px-2">-->
+                <!--      <h6 style="margin-bottom: 0px;">LEVITRA UK -US </h6>-->
+                <!--      <p>US-UK 7-10 Days Shipping <img src="images/fast.png" width="20px"> </p>-->
+                <!--    </div>-->
+                <!--    <div class="button d-flex justify-content-end">-->
+                <!--      <button class="btn d-block btn-primary" type="submit"><i class="ci-cart fs-lg me-2"></i>View</button>-->
+                <!--    </div>-->
+                <!--  </div>-->
+                <div class="accordion accordion-flush mt-4 prdt-usage productAccord" id="accordionFlushExample">
+                  <!-- Item -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                      <button class="accordion-button collapsed product-accord-item" type="button" data-bs-toggle="collapse" data-bs-target="#use" aria-expanded="false" aria-controls="flush-collapseOne">How to use</button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="use" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">
+                        <?php 
+                          $select_use=$conn->prepare("SELECT * FROM ogproductuse WHERE productCode = '$productCode'");
+                          $select_use->execute();  
+                          $rowUse=$select_use->rowCount();
+                          while($rowUse=$select_use->fetch(PDO::FETCH_ASSOC))
+                          {
+                        ?>
+                        <p><?php  echo $rowUse['data']; ?></p>
+                        <?php
+                          }
+                        ?>
+                        </div>
+                    </div>
+                  </div>
+                  
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#warning" aria-expanded="false" aria-controls="flush-collapseOne">Side effects</button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="warning" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">
+                        <?php 
+                          $select_use=$conn->prepare("SELECT * FROM ogproductsideeffect WHERE productCode = '$productCode'");
+                          $select_use->execute();  
+                          $rowUse=$select_use->rowCount();
+                          while($rowUse=$select_use->fetch(PDO::FETCH_ASSOC))
+                          {
+                        ?>
+                        <p><?php  echo $rowUse['data']; ?></p>
+                        <?php
+                          }
+                        ?>
+                        </div>
+                    </div>
+                  </div>
+                  
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sideeffect" aria-expanded="false" aria-controls="flush-collapseOne">Warnings & Precautions</button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="sideeffect" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">
+                        <?php 
+                          $select_use=$conn->prepare("SELECT * FROM ogproductwarning WHERE productCode = '$productCode'");
+                          $select_use->execute();  
+                          $rowUse=$select_use->rowCount();
+                          while($rowUse=$select_use->fetch(PDO::FETCH_ASSOC))
+                          {
+                        ?>
+                        <p><?php  echo $rowUse['data']; ?></p>
+                        <?php
+                          }
+                        ?>
+                        </div>
+                    </div>
+                  </div>
+                  
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#interaction" aria-expanded="false" aria-controls="flush-collapseOne">Drug interactions</button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="interaction" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">
+                        <?php 
+                          $select_use=$conn->prepare("SELECT * FROM ogproductinteraction WHERE productCode = '$productCode'");
+                          $select_use->execute();  
+                          $rowUse=$select_use->rowCount();
+                          while($rowUse=$select_use->fetch(PDO::FETCH_ASSOC))
+                          {
+                        ?>
+                        <p><?php  echo $rowUse['data']; ?></p>
+                        <?php
+                          }
+                        ?>
+                        </div>
+                    </div>
+                  </div>
+                  
+                </div>
+            </div>
+            </div>
+            <div class="col-xl-2 px-2 mb-3 product_image">
+                <div class="bg-light rounded-3 py-4 px-lg-3">
+                    <picture>
+                         <source media="(max-width: 900px)" srcset="images/payment-sidebar-mob.png">
+                         <img src="https://myglobal1.gumlet.io/images/payment-sidebar.png">
+                     </picture>
+                </div>
+            </div>
+          </section>
+          
+    <section class="m-0 mb-2 product-carousel-card" style="padding:0 25px !important;">
+        <!-- Heading-->
+        <div class="text-center pt-1">
+          <h2 class="h3 mb-0 pt-3 me-3">Related Products</h2>
+          <!--<div class="pt-3"><a class="btn btn-outline-accent btn-sm" href="shop.php">View All<i class="fa-solid fa-arrow-right ms-1 me-n1"></i></a></div>-->
+        </div>
+        <div class="tns-carousel tns-controls-static tns-controls-outside tns-nav-disabled py-2">
+          <div class="tns-carousel-inner" data-carousel-options="{&quot;items&quot;: 2, &quot;gutter&quot;: 16, &quot;loop&quot;: true, &quot;autoHeight&quot;: true, &quot;responsive&quot;: {&quot;0&quot;:{&quot;items&quot;:1}, &quot;480&quot;:{&quot;items&quot;:2}, &quot;720&quot;:{&quot;items&quot;:3}, &quot;991&quot;:{&quot;items&quot;:2}, &quot;1140&quot;:{&quot;items&quot;:4}, &quot;1300&quot;:{&quot;items&quot;:4}, &quot;1500&quot;:{&quot;items&quot;:4}}}">
+            <!-- Product-->
+            
+            <?php
+            $select_product=$conn->prepare("SELECT * FROM ogproduct WHERE productCategory=? limit 7");
+            $select_product->execute([$productCategory]);  
+            $row=$select_product->rowCount();
+            while($row=$select_product->fetch(PDO::FETCH_ASSOC))
+            {
+                $productName = $row['productName'];
+                $productCode = $row['productCode'];
+                $productCategory = $row['productCategory'];
+                $productlower = strtolower($productCategory);
+                $prductcategoryslug = str_replace(" ","-",$productlower);
+                $productDetails = $row['productDescription'];
+                $productDetails = $row['productDescription'];
+                                $productImage = $row['productImage'];
+                                if(strlen($productImage)>2 AND $productImage!='assets/images/products/'){
+                                  $productImage = $row['productImage'];
+                                }else {
+                                  $productImage = 'defaultMed.png';
+                                }
+                $productImageAlt = $row['productImageAlt'];
+                $productImageTitle = $row['productImageTitle'];
+                $productType = $row['productType'];
+                $productSlug = $row['productSlug'];
+                $productDiscount = $row['productDiscount'];
+                $productSeoTitle = $row['productSeoTitle'];
+                $productSeoDescription = $row['productDescription'];
+                        $select_product_price=$conn->prepare("SELECT * FROM ogquantity WHERE productCode='$productCode' ORDER BY price ASC limit 1");
+                        $select_product_price->execute();
+                        while($row=$select_product_price->fetch(PDO::FETCH_ASSOC))
+                        {
+                            $price = $row['price']; 
+                        }
+            ?>
+                <div class="">
+                        <a href="<?php echo $prductcategoryslug.'/'.$productSlug; ?>">
+                        <div class="card product-card" style=" position: relative; ">
+                            <!--<p class="besttag" style=" position: absolute; bottom: 0px; right: 0; z-index: 5; font-size: 10px; background: #42d697; padding: 0px 4px; color: #fff; ">Bestseller</p>-->
+                            <div class="card-img-top d-block overflow-hidden">
+                                <img src="https://myglobal1.gumlet.io/onglobaladmincrm/<?php echo $productImage; ?>?w=208" alt="<?php echo $productImageAlt; ?>" title="<?php echo $productImageTitle; ?>">
+                            </div>
+                            <div class="card-body">
+                                <small><?php echo $productCategory; ?></small>
+                                <h3 class="product-title fs-sm"><?php echo $productName; ?></h3>
+                                <p class="product-description d-flex justify-content-between">
+                                  <?php
+                                    if(strpos($productCategory,'Steroids')>0){
+                                        echo '<span>12 to 18 Days Standard Delivery</sapn>';
+                                    }
+                                    elseif(strpos($productName,'USA to USA')>0) {
+                                        echo '<span>5 to 7 Days USA to USA Shipping</sapn>';
+                                    }
+                                    else {
+                                        echo '<span>12 to 18 Days Standard Delivery</sapn>';
+                                    }
+                                  ?>
+                                </p>
+                                <p class="product-price">
+                                  $<?php echo $price; ?>/<small><?php echo $productType; ?></small>*
+                                </p>
+                             </div>
+                        </div>
+                    </a>
+                </div>
+            <?php
+            }
+            ?>
+
+          </div>
+        </div>
+      </section>
+
+          <!-- Related products-->
+          <!-- <section class="pb-5 mb-2 mb-xl-4">
+            <h2 class="h3 pb-2 mb-grid-gutter text-center">You may also like</h2>
+            <div class="tns-carousel tns-controls-static tns-controls-outside tns-nav-enabled">
+              <div class="tns-carousel-inner" data-carousel-options='{"items": 2, "gutter": 16, "controls": true, "responsive": {"0":{"items":1}, "480":{"items":2}, "720":{"items":3}, "991":{"items":2}, "1140":{"items":3}, "1300":{"items":4}, "1500":{"items":5}}}'>
+                <div>
+                  <div class="card product-card card-static pb-3">
+                    <button class="btn-wishlist btn-sm" type="button" data-bs-toggle="tooltip" data-bs-placement="left" title="Add to wishlist"><i class="fa-solid fa-heart"></i></button><a class="card-img-top d-block overflow-hidden" href="grocery-single.html"><img src="images/catalog-08.jpg" alt="Product"></a>
+                    <div class="card-body py-2"><a class="product-meta d-block fs-xs pb-1" href="#">Dairy and Eggs</a>
+                      <h3 class="product-title fs-sm"><a href="grocery-single.html">Mozzarella Cheese (125g)</a></h3>
+                      <div class="product-price"><span class="text-accent">$4.<small>30</small></span></div>
+                    </div>
+                    <div class="product-floating-btn">
+                      <button class="btn btn-primary btn-shadow btn-sm" type="button">+<i class="ci-cart fs-base ms-1"></i></button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="card product-card card-static pb-3">
+                    <button class="btn-wishlist btn-sm" type="button" data-bs-toggle="tooltip" data-bs-placement="left" title="Add to wishlist"><i class="fa-solid fa-heart"></i></button><a class="card-img-top d-block overflow-hidden" href="grocery-single.html"><img src="images/catalog-09.jpg" alt="Product"></a>
+                    <div class="card-body py-2"><a class="product-meta d-block fs-xs pb-1" href="#">Personal hygiene</a>
+                      <h3 class="product-title fs-sm text-truncate"><a href="grocery-single.html">Men&rsquo;s Shampoo (400ml)</a></h3>
+                      <div class="product-price"><span class="text-accent">$5.<small>99</small></span></div>
+                    </div>
+                    <div class="product-floating-btn">
+                      <button class="btn btn-primary btn-shadow btn-sm" type="button">+<i class="ci-cart fs-base ms-1"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section> -->
+        </div>
+      </section>
+
+<?php
+    include('include/footer.php');
+?>
+  

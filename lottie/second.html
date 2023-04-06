@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex" />
+  <title>CodePen - LottieFiles Confetti Animation Example</title>
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    body {    
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    .container {
+        overflow: hidden;
+        display: flex;
+        height: 100vh
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div class="svg" id="svg"></div>
+    </div>
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js'></script>
+    <script>
+        const svgContainer = document.getElementById('svg');
+        const animItem = bodymovin.loadAnimation({
+            wrapper: svgContainer,
+            animType: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'https://assets2.lottiefiles.com/packages/lf20_nxsyeqbd.json'
+        });
+    </script>
+</body>
+</html>

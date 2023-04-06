@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>contact form</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/css/intlTelInput.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="" />
+
+    <style>
+        body {
+            background-image: url(https://myglobal1.gumlet.io/background/DESKTOP-DESIGN-2.png);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .contact__formSection .img__section .contact_img {
+            width: 100%;
+        }
+
+        .contact__formSection .form-control:focus {
+            border-color: #4b7dc5;
+            box-shadow: none;
+        }
+
+        .contact__formSection .form-floating>i {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+        }
+
+        .contact__formSection .form-control {
+            padding-right: 35px;
+        }
+
+        .contact__formSection .form-floating>label,
+        .contact__formSection .form-floating>i {
+            color: gray;
+        }
+
+        .contact__formSection .conatct-heading {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 0px;
+        }
+
+        .contact__formSection p {
+            font-size: 12px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .contact__formSection .cuts-primary {
+            background-color: #ffffff;
+            color: #fff;
+            opacity: 1;
+        }
+
+        .contact__formSection .cuts-primary:hover,
+        .contact__formSection .cuts-primary:focus {
+            background-color: #164b96;
+            color: #fff;
+        }
+
+        .contact__formSection .form-control:focus i {
+            color: #164b96;
+            font-size: 40px;
+        }
+
+        .contact__formSection .c-field,
+        .contact__formSection .iti {
+            width: 338px;
+        }
+
+        .contact__formSection .phone_num {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            padding-right: 35px !important;
+        }
+
+        .contact__formSection .text-area-div>label {
+            height: fit-content;
+            padding-bottom: 0px;
+        }
+
+        .contact__formSection .form-floating>.form-control:focus,
+        .contact__formSection .form-floating>.form-control:not(:placeholder-shown) {
+            padding-top: 0.625rem;
+        }
+
+        .contact__formSection .form-floating>.form-control:focus~label,
+        .contact__formSection .form-floating>.form-control:not(:placeholder-shown)~label,
+        .contact__formSection .form-floating>.form-select~label {
+            opacity: 1;
+            transform: scale(0.85) translateY(-1.8rem) translateX(0.15rem);
+            color: #4b7dc5;
+            background-color: #fff;
+            padding-bottom: 0px;
+            height: fit-content;
+        }
+
+        span.error {
+            font-size: 12px;
+            color: #dc3545;
+            font-weight: 500;
+        }
+
+        p.success {
+            background: #00a75961;
+            color: #038549;
+            text-align: center;
+            margin: 7px 0;
+            border-radius: 8px;
+            padding: 5px 4px;
+        }
+
+        .button__text {
+            /*font: bold 20px "Quicksand", san-serif;*/
+            color: #980DF9;
+            transition: all 0.2s;
+            font-weight: 700;
+        }
+
+        .button--loading .button__text {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .button--loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 4px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: button-loading-spinner 1s ease infinite;
+        }
+
+        @keyframes button-loading-spinner {
+            from {
+                transform: rotate(0turn);
+            }
+
+            to {
+                transform: rotate(1turn);
+            }
+        }
+
+
+        @media screen and (max-width: 600px) {
+            .conatct-heading {
+                text-align: center;
+            }
+
+            .contact__formSection .c-field,
+            .contact__formSection .iti {
+                width: 100% !important;
+            }
+            body {
+                background-image: url(https://myglobal1.gumlet.io/background/mens-mobile.png);
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+            .contact__formSection .cuts-primary {
+                background-color: #ffffff;
+                color: #fff;
+                opacity: 1;
+                width: 100% !important;
+            }
+            .contact__formSection p {
+                font-size: 12px;
+                color: #fff;
+                font-weight: 600;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contact__formSection">
+        <div class="container">
+            <div class="row" style=" display: flex; align-items: center; height: 100vh;">
+                <div class="col-sm-6 col-12">
+                    <div class="img__section">
+                        <img class="contact_img" src="https://gcdnb.pbrd.co/images/Qvl1MlYR3lBX.jpg?o=1" alt="" />
+                    </div>
+                </div>
+                <div class="col-sm-6 col-12">
+
+                    <p class="success"></p>
+                    <form action="" id="form">
+                        <input type="hidden" name="web" value="local">
+                        <input type="hidden" name="type" value="inq">
+                        <input type="hidden" name="page" value="file:///C:/Users/Hi/Downloads/contact.html">
+                        <!-- <p class="conatct-heading">Chuckie Eat The Deal !</p>
+                        <p>Deals On Medicines That Will Haunt You Like The Chuckie. <br>
+                        Just Fill The Form And Unlock The Spirit Of Halloween Offers.
+                        </p> -->
+                        <div class="form-floating c-field mb-4 username">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" name="username" onkeyup="checkInput()" class="form-control" id="username"
+                                placeholder="Careter carder" />
+                            <label for="floatingInput">Username</label>
+                        </div>
+                        <div class="form-floating c-field mb-4 email">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" name="email" onkeyup="checkInput()" class="form-control" id="email"
+                                placeholder="name@example.com" />
+                            <label for="floatingInput">Email address</label>
+                        </div>
+                        <div class="form-floating c-field mb-4 phone">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <label for="number" class="form-label">Phone number</label>
+                            <input class="form-control tel phone_num" onkeyup="checkInput()" type="tel" name="phone"
+                                inputmode="tel" value="" id="telephone" />
+                        </div>
+                        <div class="form-floating text-area-div mb-4 message">
+                            <textarea class="form-control" name="message" onkeyup="checkInput()"
+                                placeholder="Leave a comment here" id="message" style="height: 100px"></textarea>
+                            <label for="floatingTextarea2">Comments</label>
+                        </div>
+                        <button type="submit " id="submit_form" style="position: relative;width: 26%;"
+                            class="btn btn-primary cuts-primary d-block d-lg-inline-block">
+                            <span class="button__text">Submit</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/4.0.8/jquery.inputmask.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/intlTelInput.min.js"></script>
+    <script>
+        $('#submit_form').prop('disabled', false);
+        $('.success').hide();
+        $('#form').submit(function (event) {
+            $('.success').hide();
+            $('.error').remove();
+            event.preventDefault();
+            $('#submit_form').prop('disabled', true);
+            var codepin = $('.iti__selected-dial-code').html();
+            var formData = new FormData(this);
+            formData.append('codepin', codepin);
+            $('#submit_form').addClass('button--loading');
+            $.ajax({
+                url: 'action.php',
+                type: 'post',
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function (data) {
+                    if (data == 'done') {
+                        $('#form').trigger("reset");
+                        $('#submit_form').prop('disabled', false);
+                        $('#submit_form').removeClass('button--loading');
+                        $('.success').show();
+                        $('.success').html('Inquiry submitted successfully');
+                    } else {
+                        $('#submit_form').prop('disabled', false);
+                        $('#submit_form').removeClass('button--loading');
+                        $('.' + data).append('<span class="error">Enter Valid ' + data + ' </span>');
+                    }
+
+                }
+            })
+        })
+
+        function checkInput() {
+            var name = $('#username').val();
+            var phone = $('#telephone').val();
+            var email = $('#email').val();
+            var message = $('#message').val();
+
+            if (name.length > 1 && phone.length > 1 && email.length > 1 && message.length > 1) {
+                if (validateEmail(email)) {
+                    $('#submit_form').prop('disabled', false);
+                }
+            } else {
+                $('#submit_form').prop('disabled', true);
+            }
+        }
+        checkInput();
+        function validateEmail(email) {
+            var re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        }
+    </script>
+    <script>
+        $(function () {
+            /*
+             * International Telephone Input v16.0.0
+             * https://github.com/jackocnr/intl-tel-input.git
+             * Licensed under the MIT license
+             */
+            var input = document.querySelectorAll("input[name=phone]");
+            var iti_el = $(".iti.iti--allow-dropdown.iti--separate-dial-code");
+            if (iti_el.length) {
+                iti.destroy();
+
+                // Get the current number in the given format
+            }
+            for (var i = 0; i < input.length; i++) {
+                iti = intlTelInput(input[i], {
+                    autoHideDialCode: false,
+                    autoPlaceholder: "aggressive",
+                    initialCountry: "auto",
+                    separateDialCode: true,
+                    preferredCountries: ["ru", "th"],
+                    customPlaceholder: function (
+                        selectedCountryPlaceholder,
+                        selectedCountryData
+                    ) {
+                        return "" + selectedCountryPlaceholder.replace(/[0-9]/g, "X");
+                    },
+                    geoIpLookup: function (callback) {
+                        $.get("https://ipinfo.io?token=26abe7355b303f", function () { }, "jsonp").always(
+                            function (resp) {
+                                var countryCode = resp && resp.country ? resp.country : "";
+                                callback(countryCode);
+                            }
+                        );
+                    },
+                    utilsScript:
+                        "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js", // just for
+                });
+
+                $('input[name="phone"]').on(
+                    "focus click countrychange",
+                    function (e, countryData) {
+                        var pl = $(this).attr("placeholder") + "";
+                        var res = pl.replace(/X/g, "9");
+                        if (res != "undefined") {
+                            $(this).inputmask(res, {
+                                placeholder: "X",
+                                clearMaskOnLostFocus: true,
+                            });
+                        }
+                    }
+                );
+
+                $('input[name="phone"]').on(
+                    "focusout",
+                    function (e, countryData) {
+                        var intlNumber = iti.getNumber();
+                        // console.log(intlNumber);
+                    }
+                );
+            }
+        });
+    </script>
+</body>
+
+</html>

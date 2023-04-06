@@ -1,0 +1,23 @@
+<?php
+function getDBBANX() 
+{
+	$dbhost="localhost";
+	$dbuser="onegloba_buyanxi";
+	$dbpass="50SqjJ2FBYP8";
+	$dbname="onegloba_buyanxiety_order";
+	
+	$conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+	return $conn;
+}
+/* DATABASE CONFIGURATION END */
+
+/* API key encryption 
+function apiToken($session_uid)
+{
+$key=md5(SITE_KEY.$session_uid);
+return hash('sha256', $key);
+}*/
+
+
+
+?>

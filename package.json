@@ -1,0 +1,21 @@
+{
+  "name": "globalpharma",
+  "version": "1.0.0",
+  "description": "<h3>Ecommerce</h3>\r <hr>\r <p>This is the dynamic e-commerce website where customer can visit page, search products, register, purchase products.</p>\r <p><b>Features Include</b></p>\r <ol>\r     <li>Add to cart</li>\r     <li>Wishlist</li>\r     <li>Discount Product<li>\r     <li>Apply Coupon</li>\r     <li>Realtime Cart reflector</li>\r     <li>Apply coupon based upon User, Category & Product in cart</li>\r     <li>Cart item updation</li>\r     <li>Move to wishlist</li>\r     <li>List user saved address</li>\r     <li>Search API</li>\r     <li>API Integration</li>\r </ol>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "sass --no-source-map --watch ./scss:./css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandeepparekh/globalpharma.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandeepparekh/globalpharma/issues"
+  },
+  "homepage": "https://github.com/sandeepparekh/globalpharma#readme"
+}

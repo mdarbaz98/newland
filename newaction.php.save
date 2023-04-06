@@ -1,0 +1,1427 @@
+<?php
+require_once "include/database.php";
+require_once ("include/class.phpmailer.php");
+require_once ("include/class.php");
+require 'vendor/autoload.php';
+// require_once("email.php");
+// include('mail-structure.php');
+$userid = $_COOKIE["userID"];
+$selectCartProduct = $conn->prepare("SELECT * FROM ogcart WHERE userId= '$userid' && wishlist=0");
+$selectCartProduct->execute();
+while ($row = $selectCartProduct->fetch(PDO::FETCH_ASSOC))
+{
+    $productCode = $row['productCode'];
+    $strengthCode = $row['strengthCode'];
+    $quantityCode = $row['quantityCode'];
+    $quantity = $row['quantity'];
+    $quantityPrice = $row['quantityPrice'];
+    $totalQuantity = $row['totalQuantity'];
+    $totalPrice = $row['totalPrice'];
+    $total = $row['total'];
+    $select_product_details = $conn->prepare("SELECT * FROM ogproduct WHERE productCode='$productCode'");
+    $select_product_details->execute();
+    while ($product = $select_product_details->fetch(PDO::FETCH_ASSOC))
+    {
+        $productName = $product['productName'];
+        $productImage = $product['productImage'];
+        $productCategory = $product['productCategory'];
+        $productType = $product['productType'];
+    }
+    if (strpos($productCategory, 'Steroids') > 0)
+    {
+        $sprice += $total;
+    }
+    elseif (strpos($productName, 'USA to USA') > 0 or strpos($productName, 'US to US') > 0)
+    {
+        $uprice += $total;
+    }
+    else
+    {
+        $gprice += $total;
+    }
+}
+session_start();
+if ($_POST['btn'] == "orderNow")
+{
+    $orderId = "INV-" . date("ymdhis");
+    $timestamp = date("Y-m-d H:i:s");
+    $oldcrmtimestamp = date("d/m/Y");
+    $fname = $_POST['first-name'];
+    $lname = $_POST['last-name'];
+    $email = $_POST['email'];
+    $phone = str_replace(" ","-",$_POST['phone']);
+    $addressline1 = $_POST['addressLine1'];
+    $addressline2 = $_POST['addressLine2'];
+    $country = $_POST['country'];
+    $state = $_POST['state'];
+    $city = $_POST['city'];
+    $postalCode = $_POST['postalCode'];
+    $addressId = $_POST['addressId'];
+    if ($addressId < 1)
+    {
+        if (!empty($fname))
+        {
+            if (!empty($lname))
+            {
+                if (!empty($email))
+                {
+                    if (!empty($phone))
+                    {
+                        $phone = $_POST['codepin'] . "-" . $phone;
+                        if (!empty($addressline1))
+                        {
+                            if (!empty($country))
+                            {
+                                if (!empty($state))
+                                {
+                                    if (!empty($city))
+                                    {
+                                        if (!empty($postalCode))
+                                        {
+                                            $servername = "newlandspharma.c7h06yjxgkol.us-east-2.rds.amazonaws.com";
+                                            $username = "root";
+                                            $password = "Iamawesome8425";
+                                            $dbname = "onegloba_globalmedz";
+
+                                            // Create connection
+                                            $oldCrmConn = new mysqli($servername, $username, $password, $dbname);
+                                            // Check connection
+                                            if ($oldCrmConn->connect_error)
+                                            {
+                                                die("Connection failed: " . $conn->connect_error);
+                                            }
+                                            else
+                                            {
+                                            }
+                                            $updateCusomer = $conn->prepare("UPDATE ogcustomer SET fname=?, lname=?, email=?, phone=?, cookieUser=? WHERE userid=?");
+                                            $updateCusomer->execute([$fname, $lname, $email, $phone, 'No', $userid]);
+                                            if ($updateCusomer)
+                                            {
+
+                                                $select_country = $conn->prepare("SELECT * FROM countries WHERE country_id = '$country'");
+                                                $select_country->execute();
+                                                while ($row = $select_country->fetch(PDO::FETCH_ASSOC))
+                                                {
+                                                    $countryName = $row['country_name'];
+                                                }
+
+                                                $select_state = $conn->prepare("SELECT * FROM states WHERE state_id = '$state'");
+                                                $select_state->execute();
+                                                while ($row = $select_state->fetch(PDO::FETCH_ASSOC))
+                                                {
+                                                    $stateName = $row['state_name'];
+                                                }
+
+                                                $select_city = $conn->prepare("SELECT * FROM cities WHERE city_id = '$city'");
+                                                $select_city->execute();
+                                                while ($row = $select_city->fetch(PDO::FETCH_ASSOC))
+                                                {
+                                                    $cityName = $row['city_name'];
+                                                }
+
+                                                $updateAddress = $conn->prepare("UPDATE ogaddress SET defaultAdd='0' WHERE userid=?");
+                                                $updateAddress->execute([$userid]);
+
+                                                $insertAddress = $conn->prepare("INSERT into ogaddress(userid, fname, lname, email, phone, addressline1, addressline2, city, country, state, postalcode,defaultAdd) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+
+                                                $insertAddress->execute([$userid, $fname, $lname, $email, $phone, $addressline1, $addressline2, $cityName, $countryName, $stateName, $postalCode, '1']);
+
+                                                $selectAddressId = $conn->prepare("SELECT id FROM ogaddress WHERE userid=? order by id DESC limit 1");
+                                                $selectAddressId->execute([$userid]);
+                                                while ($addressIDs = $selectAddressId->fetch(PDO::FETCH_ASSOC))
+                                                {
+                                                    $lastAddId = $addressIDs['id'];
+                                                }
+                                                // echo $lastAddId;
+                                                if ($insertAddress)
+                                                {
+                                                    $selectCartProduct = $conn->prepare("SELECT * FROM ogcart WHERE userId= '$userid' && wishlist=0");
+                                                    $selectCartProduct->execute();
+                                                    while ($row = $selectCartProduct->fetch(PDO::FETCH_ASSOC))
+                                                    {
+                                                        $productCode = $row['productCode'];
+                                                        $strengthCode = $row['strengthCode'];
+                                                        $quantityCode = $row['quantityCode'];
+                                                        $quantity = $row['quantity'];
+                                                        $quantityPrice = $row['quantityPrice'];
+                                                        $totalQuantity = $row['totalQuantity'];
+                                                        $totalPrice = $row['totalPrice'];
+                                                        $total = $row['total'];
+                                                        $total2 = $row['total'];
+                                                        $select_product_details = $conn->prepare("SELECT * FROM ogproduct WHERE productCode='$productCode'");
+                                                        $select_product_details->execute();
+                                                        while ($product = $select_product_details->fetch(PDO::FETCH_ASSOC))
+                                                        {
+                                                            $productName = $product['productName'];
+                                                            $productImage = $product['productImage'];
+                                                            $productCategory = $product['productCategory'];
+                                                            $productType = $product['productType'];
+                                                        }
+                                                        $selectStrengthName = $conn->prepare("SELECT * FROM ogstrength WHERE strengthCode= '$strengthCode'");
+                                                        $selectStrengthName->execute();
+                                                        while ($row = $selectStrengthName->fetch(PDO::FETCH_ASSOC))
+                                                        {
+                                                            $strengthName = $row['strengthName'];
+                                                        }
+
+                                                        if (strpos($productCategory, 'Steroids') > 0)
+                                                        {
+                                                            $sprice += $total;
+                                                        }
+                                                        elseif (strpos($productName, 'USA to USA') > 0 or strpos($productName, 'US to US') > 0)
+                                                        {
+                                                            $uprice += $total;
+                                                        }
+                                                        else
+                                                        {
+                                                            $gprice += $total;
+                                                        }
+
+                                                        $insertProduct = $conn->prepare("INSERT into ogorderproduct(productName, productCategory, strength, orderid, productCode, quantityCode, strengthCode, quantity, quantityPrice, totalQuantity, totalPrice, total, userId) 
+                                                        		VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                                        $insertProduct->execute([$productName, $productCategory, $strengthName, $orderId, $productCode, $quantityCode, $strengthCode, $quantity, $quantityPrice, $totalQuantity, $totalPrice, $totalPrice * $totalQuantity, $userid]);
+
+                                                    }
+                                                    $getCustId = "SELECT * FROM shippinginfo ORDER BY sid DESC limit 1";
+                                                    $lastCustId = $oldCrmConn->query($getCustId);
+                                                    while ($custidrow = $lastCustId->fetch_assoc())
+                                                    {
+                                                        $custid = $custidrow['cid'];
+                                                        $custid++;
+                                                    }
+
+                                                    $insertToOldCrm = "INSERT INTO shippinginfo(cid,email,fname, lname, address, city, state, country, zip, phone, payby) VALUES($custid, '$email', '$fname', '$lname', '$addressline1', '$cityName', '$stateName', '$countryName', '$postalCode', '$phone', 'Pay by credit or debit card')";
+                                                    if ($oldCrmConn->query($insertToOldCrm) === true)
+                                                    {
+                                                        $allProductPrice = $conn->prepare("SELECT SUM(total) AS totalPrice FROM ogcart WHERE userID='$userid' && wishlist=0");
+                                                        $allProductPrice->execute();
+                                                        while ($priceTotal = $allProductPrice->fetch(PDO::FETCH_ASSOC))
+                                                        {
+                                                            $totalCartPrice = $priceTotal['totalPrice'];
+                                                            $select_user_coupan = $conn->prepare("SELECT coupon FROM ogcustomer WHERE userid='$userid'");
+                                                            $select_user_coupan->execute();
+                                                            while ($coupan = $select_user_coupan->fetch(PDO::FETCH_ASSOC))
+                                                            {
+                                                                $coupon = $coupan['coupon'];
+                                                            }
+                                                            if ($coupon == "")
+                                                            {
+                                                                $amtDiscount = 0;
+                                                            }
+                                                            else
+                                                            {
+                                                                $selectCouponData = $conn->prepare("SELECT * FROM coupons WHERE code='$coupon'");
+                                                                $selectCouponData->execute();
+                                                                while ($coupanData = $selectCouponData->fetch(PDO::FETCH_ASSOC))
+                                                                {
+                                                                    $discount = $coupanData['discount'];
+                                                                    $orderAmount = $coupanData['orderAmount'];
+                                                                    $code = $coupanData['code'];
+                                                                    $maxAmount = $coupanData['maxAmount'];
+                                                                    $amtDiscount = $totalCartPrice * ($discount / 100);
+                                                                    $disType = $coupanData['isTypePercentage'];
+                                                                    if ($disType == 1)
+                                                                    {
+                                                                        $amtDiscount = $totalCartPrice * ($discount / 100);
+                                                                        if ($amtDiscount > $maxAmount)
+                                                                        {
+                                                                            $amtDiscount = $maxAmount;
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if ($amtDiscount > $maxAmount)
+                                                                        {
+                                                                            $amtDiscount = $maxAmount;
+                                                                        }else {
+                                                                        $amtDiscount = $discount;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            // if($totalCartPrice>=250) {
+                                                            //     $shipping = 0;
+                                                            //     $total = $totalCartPrice - $amtDiscount;
+                                                            //     $total = $total + $shipping;
+                                                            // }
+                                                            // else {
+                                                            //     $shipping = 25;
+                                                            //     $total = $totalCartPrice - $amtDiscount;
+                                                            //     $total = $total + $shipping;
+                                                            // }
+                                                            
+                                                        }
+                                                        $insertorders = "INSERT INTO orders(cust_id, orderno, orderdate, payment_mode, order_value, shipping, total, user_ip, payment_link, status) 
+                                                                VALUES($custid, '$orderId', '$oldcrmtimestamp', 'Credit Card', '$totalCartPrice', '$shipping', '$total', ' ', ' ', 'Pending')";
+                                                        if ($oldCrmConn->query($insertorders))
+                                                        {
+                                                            $lastid = $oldCrmConn->insert_id;
+                                                            $insertToOldCrm = "INSERT INTO tbtcustomer(cid,fname, lname, email, mobile, password) VALUES($custid, '$fname', '$lname', '$email', '$phone', ' ')";
+                                                            if ($oldCrmConn->query($insertToOldCrm) === true)
+                                                            {
+
+                                                            }
+                                                            else
+                                                            {
+                                                                echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+                                                            }
+
+                                                            $selectCartProduct = $conn->prepare("SELECT * FROM ogcart WHERE userId= '$userid' && wishlist=0");
+                                                            $selectCartProduct->execute();
+                                                            while ($row = $selectCartProduct->fetch(PDO::FETCH_ASSOC))
+                                                            {
+                                                                $productCode = $row['productCode'];
+                                                                $strengthCode = $row['strengthCode'];
+                                                                $quantityCode = $row['quantityCode'];
+                                                                $quantity = $row['quantity'];
+                                                                $quantityPrice = $row['quantityPrice'];
+                                                                $totalQuantity = $row['totalQuantity'];
+                                                                $totalPrice = $row['totalPrice'];
+                                                                $total = $row['total'];
+
+                                                                $selectProductName = $conn->prepare("SELECT * FROM ogproduct WHERE productCode= '$productCode'");
+                                                                $selectProductName->execute();
+                                                                while ($row = $selectProductName->fetch(PDO::FETCH_ASSOC))
+                                                                {
+                                                                    $productName = $row['productName'];
+                                                                    $productCategory = $row['prorductCategory'];
+                                                                }
+                                                                $selectStrengthName = $conn->prepare("SELECT * FROM ogstrength WHERE strengthCode= '$strengthCode'");
+                                                                $selectStrengthName->execute();
+                                                                while ($row = $selectStrengthName->fetch(PDO::FETCH_ASSOC))
+                                                                {
+                                                                    $strengthName = $row['strengthName'];
+                                                                }
+                                                                $selectQuantity = $conn->prepare("SELECT * FROM ogquantity WHERE quantityCode= '$quantityCode'");
+                                                                $selectQuantity->execute();
+                                                                while ($row = $selectQuantity->fetch(PDO::FETCH_ASSOC))
+                                                                {
+                                                                    $quantityName = $row['quantity'];
+                                                                }
+
+                                                                $insertCategory = "INSERT INTO `category` (`title`, `image_src`, `status`) VALUES ('$productCategory', 'sfsf', '1');";
+                                                                if ($oldCrmConn->query($insertCategory))
+                                                                {
+                                                                    $newcategoryid = $oldCrmConn->insert_id;
+                                                                }
+
+                                                                $insertProduct = "INSERT INTO `subcategory`(`id`, `productname`, `image`, `price`, `packageSize`, `description`, `status`) VALUES ('$newcategoryid', '$productName', 'sdsd', 5, 'ff', 'ff', '3')";
+                                                                if ($oldCrmConn->query($insertProduct))
+                                                                {
+                                                                    $newproductsid = $oldCrmConn->insert_id;
+                                                                }
+
+                                                                $insertStrength = "INSERT INTO `pdetails`(`cid`, `product_id`, `strength`, `packaging_method`) VALUES ('$newcategoryid', '$newproductsid','$strengthName', 'pill')";
+                                                                if ($oldCrmConn->query($insertStrength))
+                                                                {
+                                                                    $newstrengthid = $oldCrmConn->insert_id;
+                                                                }
+
+                                                                $insertToOldCrm = "INSERT INTO order_details(order_id, cid, pid, strength, qty, price) VALUES($lastid, $newcategoryid, $newproductsid, $newstrengthid, $quantity*$totalQuantity, $quantityPrice)";
+                                                                if ($oldCrmConn->query($insertToOldCrm) === true)
+                                                                {
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+                                                                }
+
+                                                                $newStrength = $productName . " " . $strengthName;
+                                                                $getOldData = "SELECT * FROM pdetails WHERE strength LIKE '%$newStrength%'";
+                                                                $oldProductResult = $oldCrmConn->query($getOldData);
+                                                                while ($productRow = $oldProductResult->fetch_assoc())
+                                                                {
+                                                                    $strengthid = $productRow['pid'];
+                                                                }
+
+                                                                $getOldData1 = "SELECT * FROM tblproductdetails WHERE strength='$strengthid' and qty='$quantityName' limit 1";
+                                                                $oldProductResult = $oldCrmConn->query($getOldData1);
+                                                                while ($productRow1 = $oldProductResult->fetch_assoc())
+                                                                {
+                                                                    $catids = $productRow1['cid'];
+                                                                    $productids = $productRow1['pid'];
+                                                                    $strengthids = $productRow1['strength'];
+                                                                    $insertToOldCrm = "INSERT INTO order_details(order_id, cid, pid, strength, qty, price) VALUES($lastid, $cat, $productids, $strengthids, $quantity*$totalQuantity, $quantityPrice)";
+
+                                                                }
+
+                                                            }
+
+                                                        }
+                                                        else
+                                                        {
+                                                            echo "Error: " . $insertorders . "<br>" . $oldCrmConn->error;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+                                                    }
+
+                                                }
+                                                else
+                                                {
+                                                    echo "Not Insert Address";
+                                                }
+                                                if ($insertProduct)
+                                                {
+                                                    $allProductPrice = $conn->prepare("SELECT SUM(total) AS totalPrice FROM ogcart WHERE userID='$userid' && wishlist=0");
+                                                    $allProductPrice->execute();
+                                                    while ($priceTotal = $allProductPrice->fetch(PDO::FETCH_ASSOC))
+                                                    {
+                                                        $totalCartPrice = $priceTotal['totalPrice'];
+                                                        $select_user_coupan = $conn->prepare("SELECT coupon FROM ogcustomer WHERE userid='$userid'");
+                                                        $select_user_coupan->execute();
+                                                        while ($coupan = $select_user_coupan->fetch(PDO::FETCH_ASSOC))
+                                                        {
+                                                            $coupon = $coupan['coupon'];
+                                                        }
+                                                        if ($coupon == "")
+                                                        {
+                                                            $amtDiscount = 0;
+                                                        }
+                                                        else
+                                                        {
+                                                            $selectCouponData = $conn->prepare("SELECT * FROM coupons WHERE code='$coupon'");
+                                                            $selectCouponData->execute();
+                                                            while ($coupanData = $selectCouponData->fetch(PDO::FETCH_ASSOC))
+                                                            {
+                                                                $discount = $coupanData['discount'];
+                                                                $orderAmount = $coupanData['orderAmount'];
+                                                                $code = $coupanData['code'];
+                                                                $maxAmount = $coupanData['maxAmount'];
+                                                                $disType = $coupanData['isTypePercentage'];
+                                                                if ($disType == 1)
+                                                                {
+                                                                    $amtDiscount = $totalCartPrice * ($discount / 100);
+                                                                    if ($amtDiscount > $maxAmount)
+                                                                    {
+                                                                        $amtDiscount = $maxAmount;
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    $amtDiscount = $discount;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        if ($sprice > 0 && $sprice <= 55)
+                                                        {
+                                                            $sshipping = 35;
+                                                        }
+                                                        elseif ($sprice >= 56 && $sprice < 250)
+                                                        {
+                                                            $sshipping = 25;
+                                                        }
+                                                        elseif ($sprice >= 250)
+                                                        {
+                                                            $sshipping = 0;
+                                                        }
+
+                                                        if ($gprice > 0 && $gprice <= 55)
+                                                        {
+                                                            $gshipping = 35;
+                                                        }
+                                                        elseif ($gprice >= 56 && $gprice < 250)
+                                                        {
+                                                            $gshipping = 25;
+                                                        }
+                                                        elseif ($gprice >= 250)
+                                                        {
+                                                            $gshipping = 0;
+                                                        }
+
+                                                        if ($uprice > 0 && $uprice <= 55)
+                                                        {
+                                                            $ushipping = 35;
+                                                        }
+                                                        elseif ($uprice >= 56 && $uprice < 250)
+                                                        {
+                                                            $ushipping = 25;
+                                                        }
+                                                        elseif ($uprice >= 250)
+                                                        {
+                                                            $ushipping = 0;
+                                                        }
+
+                                                        $shipping = $sshipping + $gshipping + $ushipping;
+                                                        $total = $totalCartPrice - $amtDiscount;
+                                                        $total = $total + $shipping;
+                                                    }
+
+                                                    $updateOrderOld = "UPDATE orders SET order_value='$totalCartPrice', shipping='$shipping', discount='$amtDiscount', total='$total' WHERE id='$lastid'";
+                                                    $oldCrmConn->query($updateOrderOld);
+                                                    echo $updateOrderOld;
+                                                    $insertOrderDetails = $conn->prepare("INSERT INTO orderdetails(orderid, userid, subtotal, dcharge, discount, total, paymentMethod, paidAmount, paymentStatus, orderStatus, orderDate, addressId, coupon,fname, lname, email, phone, addressline1, addressline2, city, country, state, postalcode) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                                                    $insertOrderDetails->execute([$orderId, $userid, $totalCartPrice, $shipping, $amtDiscount, $total, 'paypal', '0', 'Unpaid', 'Pending', $timestamp, $lastAddId, $code, $fname, $lname, $email, $phone, $addressline1, $addressline2, $cityName, $countryName, $stateName, $postalCode, ]);
+                                                    if ($insertOrderDetails)
+                                                    {
+                                                        $deleteFromCart = $conn->prepare("DELETE FROM ogcart WHERE userId && wishlist=0");
+                                                        $deleteFromCart->execute([$userid]);
+                                                        $updateCoupon = $conn->prepare("UPDATE ogcustomer SET coupon=NULL WHERE userid=?");
+                                                        $updateCoupon->execute([$userid]);
+                                                        echo json_encode(array(
+                                                            "invid" => $orderId
+                                                        ));
+                                                        // $_SESSION['userLogin'] = "True";
+                                                        // $_SESSION['userid']=$userid;
+                                                        // $sentMail = new MailSmsOtp();
+                                                        // $sentMail->mail($email, 'Thank You For Order.', $msg);
+                                                        
+                                                    }
+                                                    else
+                                                    {
+                                                        echo "Fail";
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                }
+                                            }
+                                            else
+                                            {
+                                                echo "Not Inserted";
+                                            }
+                                        }
+                                        else
+                                        {
+                                            echo "Postal Code Empty";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        echo "city empty";
+                                    }
+                                }
+                                else
+                                {
+                                    echo "state empty";
+                                }
+                            }
+                            else
+                            {
+                                echo "country empty";
+                            }
+                        }
+                        else
+                        {
+                            echo "Address empty";
+                        }
+                    }
+                    else
+                    {
+                        echo "phone empty";
+                    }
+                }
+                else
+                {
+                    echo "email empty";
+                }
+            }
+            else
+            {
+                echo "lname empty";
+            }
+        }
+        else
+        {
+            echo "fname empty";
+        }
+    }
+}
+if (strlen($addressId) > 0)
+{
+    $orderId = "INV-" . date("ymdhis");
+    $selectUserID = $conn->prepare("SELECT * FROM ogaddress WHERE id = ?");
+    $selectUserID->execute([$addressId]);
+    while ($addressROW = $selectUserID->fetch(PDO::FETCH_ASSOC))
+    {
+        $addressUserId = $addressROW['userid'];
+        $email = $addressROW['email'];
+        $fname = $addressROW['fname'];
+        $lname = $addressROW['lname'];
+        $phone = $addressROW['phone'];
+    }
+    $selectExistUser1 = $conn->prepare("SELECT * FROM ogcustomer WHERE userid = ?");
+    $selectExistUser1->execute([$addressUserId]);
+    while ($row1= $selectExistUser1->fetch(PDO::FETCH_ASSOC))
+    {
+            $coupon = $row1['coupon'];
+    }
+
+    $selectExistUser = $conn->prepare("SELECT * FROM ogcustomer WHERE email = ?");
+    $selectExistUser->execute([$email]);
+    $isCustomer = $selectExistUser->rowCount();
+    if ($isCustomer > 0)
+    {
+        while ($row = $selectExistUser->fetch(PDO::FETCH_ASSOC))
+        {
+            $existuserid = $row['userid'];
+        }
+        // $updateExistAddress->$conn->prepare("UPDATE ogaddress SET defaultAdd=? WHERE userid=?");
+        // $updateExistAddress->execute([0,$existuserid]);
+        // $updateExistAddress->$conn->prepare("UPDATE ogaddress SET defaultAdd=?, userid=? WHERE id=?");
+        // $updateExistAddress->execute([1,$existuserid,$addressId]);
+        
+
+        $updateAddress = $conn->prepare("UPDATE ogaddress SET defaultAdd='0' WHERE userid=?");
+        $updateAddress->execute([$existuserid]);
+
+        $setDefualt = $conn->prepare("UPDATE ogaddress SET defaultAdd='1', userid=? WHERE id=?");
+        $setDefualt->execute([$existuserid, $addressId]);
+
+    }
+    else
+    {
+        $selectUserID = $conn->prepare("SELECT * FROM ogaddress WHERE id = ?");
+        $selectUserID->execute(['$addressId']);
+        while ($addressROW = $selectUserID->fetch(PDO::FETCH_ASSOC))
+        {
+            $addressUserId = $addressROW['userid'];
+            $email = $addressROW['email'];
+            $fname = $addressROW['fname'];
+            $lname = $addressROW['lname'];
+            $phone = $addressROW['phone'];
+            $couponAg = $addressROW['coupon'];
+        }
+        $deleteCustomer = $conn->prepare("DELETE FROM ogcustomer WHERE userid=?");
+        $deleteCustomer->execute([$addressUserId]);
+        $insertNewCustomer = $conn->prepare("INSERT into ogcustomer(userid, fname, lname, email, phone, coupon) value(?,?,?,?,?,?)");
+        $insertNewCustomer->execute([$addressUserId, $fname, $lname, $email, $phone, $couponAg]);
+    }
+
+    $selectUserIDAgain = $conn->prepare("SELECT * FROM ogaddress WHERE id = ?");
+    $selectUserIDAgain->execute([$addressId]);
+    while ($addressROWAgain = $selectUserIDAgain->fetch(PDO::FETCH_ASSOC))
+    {
+        $useridnew = $addressROWAgain['userid'];
+        if (!isset($_SESSION['IS_LOGIN']))
+        {
+            $deleteFromCart = $conn->prepare("DELETE FROM ogcart WHERE userId=?");
+            $deleteFromCart->execute([$existuserid]);
+        }
+
+        $updateOgCart = $conn->prepare('UPDATE ogcart SET userId=? WHERE userId=?');
+        $updateOgCart->execute([$useridnew, $userid]);
+        
+        
+        $userid = $addressROWAgain['userid'];
+        
+        $updateCoup = $conn->prepare('UPDATE ogcustomer SET coupon=? WHERE userId=?');
+        $updateCoup->execute([$coupon, $userid]);
+
+    }
+
+    if (!isset($_SESSION['USER_ID']))
+    {
+        $bytes = random_bytes(36);
+        $unicode = bin2hex($bytes);
+        $updateUniCode = $conn->prepare("UPDATE ogcustomer SET uniqueloginid=? WHERE userid=?");
+        $updateUniCode->execute([$unicode, $userid]);
+
+        $msg1 = '
+                                                    <table style="max-width:670px; width: 100%; margin:0 auto;background-color:#fff;border-radius:3px;">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td>
+                                                                <div style="padding: 48px 0;text-align: center;width: 100%; background: #7287ff;">
+                                                                    <img src="images/mail/celebrate.gif" style=" width: 104px; ">
+                                                                    <h4 style=" margin: 0 !important; font-family: Lato,Arial,Helvetica,sans-serif; font-size: 16px; font-weight: 900; color: #ffffff; ">CONGRETULATION!!</h4>
+                                                                    <h2 style="color: #fff;font-weight: 900;font-family:Lato,Arial,Helvetica,sans-serif;font-size: 35px;margin: 0;margin-bottom: 4px;">Account Created</h2>
+                                                                </div>
+                                                                <div style=" padding: 14px 12px; text-align: center; border-left: 1px solid #f0efef; border-right: 1px solid #f0efef; border-bottom: 1px solid #f0efef;">
+                                                                    <h2 style="color: #000;font-weight: 400;font-family:Lato,Arial,Helvetica,sans-serif;font-size: 15px;margin: 0;margin-bottom: 4px;">
+                                                                        Congratulations! Your account has been successfully created. Just follow
+                                                                        this link below to access your account and you will be able to track your orders
+                                                                    </h2>
+                                                                    <a href="directlogin/' . $unicode . '" style=" font-size: 20px; font-family: Lato,Arial,Helvetica,sans-serif; font-weight: 600; text-decoration: none; background: #7287ff; color: #fff; padding: 10px 18px 12px 18px; display: block; width: 76%; margin: 24px auto 0 auto; border-radius: 3px; text-align: center; box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 13%); ">Access Account</a>
+                                                                    <p style=" font-family: Lato,Arial,Helvetica,sans-serif; font-weight: 800; ">OR</p> 
+                                                                    <a href="directlogin/' . $unicode . '" style=" color: #7287ff; text-decoration: none; font-weight: 500; font-size: 17px; ">directlogin/' . $unicode . '</a>
+                                                                    <p style=" font-family: Lato,Arial,Helvetica,sans-serif; ">Get in touch if you have any questions regarding our new product.</p>
+                                                                    <p style=" font-family: Lato,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: 500; ">Feel free to contact us 24/7. We are here to help.</p> 
+                                                                    <p style=" font-family: Lato,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: 500; ">All the best</p> 
+                                                                    <p style=" font-family: Lato,Arial,Helvetica,sans-serif; font-size: 14px; font-weight: 700; color: #000000; ">Team Newlands Pharmacy</p
+                                                                </div>
+                                                                
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                    </table>
+                                                ';
+        
+	$curl = curl_init();
+            curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://hideuri.com/api/v1/shorten",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => "url=order/invoice/".$orderId."",
+            CURLOPT_HTTPHEADER => array(
+                "content-type: application/x-www-form-urlencoded"
+            ),
+            ));
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+            if ($err) {
+            echo "cURL Error #:" . $err;
+            } else {
+            $shortURL = json_decode($response, true)['result_url'];
+        }
+        
+                $post_data = [
+                        'username'=>'Newlands Pharmacy', 
+                        'key'=>'Newlands Pharmacy@2022', 
+                        'method'=>'http', 
+                        'to'=>$phone, 
+                        'message'=>'Thank you for shopping with us '.$fname.'. Your invoice number is #'.$orderId.'. You can review your order at '.$shortURL.'. We will shortly send you the payment link - GlobalPharma', 
+                        'senderid'=>'mycompany'];
+                    $ch = curl_init(); 
+                    curl_setopt($ch, CURLOPT_URL, "https://api-mapper.clicksend.com/http/v2/send.php" );
+                    curl_setopt($ch, CURLOPT_POST, 1 );
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    $postResult = curl_exec($ch);
+                    if (curl_errno($ch)) {
+                        // print curl_error($ch);
+                    }
+                    curl_close($ch);
+                    // var_dump($postResult);
+                
+                
+                $curl = curl_init();
+                
+                curl_setopt_array($curl, array(
+                  CURLOPT_URL => "https://api.ultramsg.com/instance5491/messages/chat",
+                  CURLOPT_RETURNTRANSFER => true,
+                  CURLOPT_ENCODING => "",
+                  CURLOPT_MAXREDIRS => 10,
+                  CURLOPT_TIMEOUT => 30,
+                  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                  CURLOPT_CUSTOMREQUEST => "POST",
+                  CURLOPT_POSTFIELDS => "token=mp15jsuyuzvpfrhz&to=".$phone."&body=Thank you for shopping with us ".$fname.". Your invoice number is #".$orderId.". You can review your order at ".$shortURL.". We will shortly send you the payment link. - GlobalPharma&priority=0&referenceId=",
+                  CURLOPT_HTTPHEADER => array(
+                    "content-type: application/x-www-form-urlencoded"
+                  ),
+                ));
+                $response = curl_exec($curl);
+                $err = curl_error($curl);
+                
+                curl_close($curl);
+                
+                if ($err) {
+                //   echo "cURL Error #:" . $err;
+                } else {
+                //   echo $response;
+                }
+                
+
+	$emails = new \SendGrid\Mail\Mail();
+        $emails->setFrom("sandeep.parekh@webenetic.com", "sandeep");
+        $emails->setSubject("Direct Access For Newlands Pharmacy");
+        $emails->addTo($email, $fname . ' ' . $lname);
+        $emails->addContent("text/html", $msg1);
+        $apiKey = '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';
+        $sendgrid = new \SendGrid($apiKey);
+        try
+        {
+            $response = $sendgrid->send($emails);
+            // print $response->statusCode() . "\n";
+            // print_r($response->headers());
+            // print $response->body() . "\n";
+            
+        }
+        catch(Exception $e)
+        {
+            echo "<pre>";
+            echo 'Caught exception: ' . $e->getMessage() . "\n";
+        }
+
+    }
+
+    // $updateAddress = $conn->prepare("UPDATE ogaddress SET defaultAdd='0' WHERE userid=?");
+    // $updateAddress->execute([$userid]);
+    // $setDefualt = $conn->prepare("UPDATE ogaddress SET defaultAdd='1' WHERE id=?");
+    // $setDefualt->execute([$addressId]);
+    
+
+    $servername = "newlandspharma.c7h06yjxgkol.us-east-2.rds.amazonaws.com";
+    $username = "root";
+    $password = "Iamawesome8425";
+    $dbname = "onegloba_globalmedz";
+
+    // Create connection
+    $oldCrmConn = new mysqli($servername, $username, $password, $dbname);
+    // Check connection
+    if ($oldCrmConn->connect_error)
+    {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    else
+    {
+    }
+    $updateCusomer = $conn->prepare("UPDATE ogcustomer SET cookieUser=? WHERE userid=?");
+    $updateCusomer->execute(['No', $userid]);
+    if ($updateCusomer)
+    {
+
+        $select_country = $conn->prepare("SELECT * FROM countries WHERE country_id = '$country'");
+        $select_country->execute();
+        while ($row = $select_country->fetch(PDO::FETCH_ASSOC))
+        {
+            $countryName = $row['country_name'];
+        }
+
+        $select_state = $conn->prepare("SELECT * FROM states WHERE state_id = '$state'");
+        $select_state->execute();
+        while ($row = $select_state->fetch(PDO::FETCH_ASSOC))
+        {
+            $stateName = $row['state_name'];
+        }
+
+        $select_city = $conn->prepare("SELECT * FROM cities WHERE city_id = '$city'");
+        $select_city->execute();
+        while ($row = $select_city->fetch(PDO::FETCH_ASSOC))
+        {
+            $cityName = $row['city_name'];
+        }
+
+        // $insertAddress = $conn->prepare("INSERT into ogaddress(userid, fname, lname, email, phone, addressline1, addressline2, city, country, state, postalcode) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+        // $insertAddress->execute([$userid, $fname, $lname, $email, $phone, $addressline1, $addressline2, $cityName, $countryName, $stateName, $postalCode]);
+        if (1 == 1)
+        {
+            $selectCartProduct = $conn->prepare("SELECT * FROM ogcart WHERE userId= '$userid' && wishlist=0");
+            $selectCartProduct->execute();
+            while ($row = $selectCartProduct->fetch(PDO::FETCH_ASSOC))
+            {
+                $productCode = $row['productCode'];
+                $strengthCode = $row['strengthCode'];
+                $quantityCode = $row['quantityCode'];
+                $quantity = $row['quantity'];
+                $quantityPrice = $row['quantityPrice'];
+                $totalQuantity = $row['totalQuantity'];
+                $totalPrice = $row['totalPrice'];
+                $total = $row['total'];
+
+                $select_product_details = $conn->prepare("SELECT * FROM ogproduct WHERE productCode='$productCode'");
+                $select_product_details->execute();
+                while ($product = $select_product_details->fetch(PDO::FETCH_ASSOC))
+                {
+                    $productName = $product['productName'];
+                    $productImage = $product['productImage'];
+                    $productCategory = $product['productCategory'];
+                    $productType = $product['productType'];
+                }
+                $selectStrengthName = $conn->prepare("SELECT * FROM ogstrength WHERE strengthCode= '$strengthCode'");
+                $selectStrengthName->execute();
+                while ($row = $selectStrengthName->fetch(PDO::FETCH_ASSOC))
+                {
+                    $strengthName = $row['strengthName'];
+                }
+
+                
+
+                $insertProduct = $conn->prepare("INSERT into ogorderproduct(productName, productCategory, strength, orderid, productCode, quantityCode, strengthCode, quantity, quantityPrice, totalQuantity, totalPrice, total, userId) 
+                                                		VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $insertProduct->execute([$productName, $productCategory, $strengthName, $orderId, $productCode, $quantityCode, $strengthCode, $quantity, $quantityPrice, $totalQuantity, $totalPrice, $totalPrice * $totalQuantity, $userid]);
+            }
+
+            $getCustId = "SELECT * FROM shippinginfo ORDER BY sid DESC limit 1";
+            $lastCustId = $oldCrmConn->query($getCustId);
+            while ($custidrow = $lastCustId->fetch_assoc())
+            {
+                $custid = $custidrow['cid'];
+                $custid++;
+            }
+
+            $selectData = $conn->prepare("SELECT * FROM ogaddress WHERE id='" . $addressId . "'");
+            $selectData->execute();
+            while ($addressCust = $selectData->fetch(PDO::FETCH_ASSOC))
+            {
+                $userid = $addressCust['userid'];
+                $email = $addressCust['email'];
+                $fname = $addressCust['fname'];
+                $lname = $addressCust['lname'];
+                $phone = $addressCust['phone'];
+                $addressline1 = $addressCust['addressline1'] . $addressCust['addressline2'];
+                $stateName = $addressCust['state'];
+                $cityName = $addressCust['city'];
+                $countryName = $addressCust['country'];
+                $postalCode = $addressCust['postalcode'];
+            }
+            $insertToOldCrm = "INSERT INTO shippinginfo(cid,email,fname, lname, address, city, state, country, zip, phone, payby) VALUES($custid, '$email', '$fname', '$lname', '$addressline1', '$cityName', '$stateName', '$countryName', '$postalCode', '$phone', 'Pay by credit or debit card')";
+            if ($oldCrmConn->query($insertToOldCrm) === true)
+            {
+                $allProductPrice = $conn->prepare("SELECT SUM(total) AS totalPrice FROM ogcart WHERE userID='$userid' && wishlist=0");
+                $allProductPrice->execute();
+                while ($priceTotal = $allProductPrice->fetch(PDO::FETCH_ASSOC))
+                {
+                    $totalCartPrice = $priceTotal['totalPrice'];
+                    $select_user_coupan = $conn->prepare("SELECT coupon FROM ogcustomer WHERE userid='$userid'");
+                    $select_user_coupan->execute();
+                    while ($coupan = $select_user_coupan->fetch(PDO::FETCH_ASSOC))
+                    {
+                        $coupon = $coupan['coupon'];
+                    }
+                    if ($coupon == "")
+                    {
+                        $amtDiscount = 0;
+                    }
+                    else
+                    {
+                        $selectCouponData = $conn->prepare("SELECT * FROM coupons WHERE code='$coupon'");
+                        $selectCouponData->execute();
+                        while ($coupanData = $selectCouponData->fetch(PDO::FETCH_ASSOC))
+                        {
+    
+                            $code = $coupanData['code'];
+    
+                            $discount = $coupanData['discount'];
+                            $orderAmount = $coupanData['minOrderAmount'];
+                            $maxAmount = $coupanData['maxDiscountAmount'];
+                            $disType = $coupanData['isTypePercentage'];
+                            if ($disType == 1)
+                            {
+                                $amtDiscount = $totalCartPrice * ($discount / 100);
+                                if ($amtDiscount > $maxAmount)
+                                {
+                                    $amtDiscount = $maxAmount;
+                                }
+                            }
+                            else
+                            {
+                                if ($amtDiscount > $maxAmount)
+                                {
+                                    $amtDiscount = $maxAmount;
+                                }else {
+                                    $amtDiscount = $discount;
+                                }
+                                
+                            }
+    
+                        }
+                    }
+    
+                    if ($sprice > 0 && $sprice <= 55)
+                    {
+                        $sshipping = 35;
+                    }
+                    elseif ($sprice >= 56 && $sprice < 250)
+                    {
+                        $sshipping = 25;
+                    }
+                    elseif ($sprice >= 250)
+                    {
+                        $sshipping = 0;
+                    }
+    
+                    if ($gprice > 0 && $gprice <= 55)
+                    {
+                        $gshipping = 35;
+                    }
+                    elseif ($gprice >= 56 && $gprice < 250)
+                    {
+                        $gshipping = 25;
+                    }
+                    elseif ($gprice >= 250)
+                    {
+                        $gshipping = 0;
+                    }
+    
+                    if ($uprice > 0 && $uprice <= 55)
+                    {
+                        $ushipping = 35;
+                    }
+                    elseif ($uprice >= 56 && $uprice < 250)
+                    {
+                        $ushipping = 25;
+                    }
+                    elseif ($uprice >= 250)
+                    {
+                        $ushipping = 0;
+                    }
+                    $shipping = $sshipping + $gshipping + $ushipping;
+                    $total = $totalCartPrice - $amtDiscount;
+                    $total = $total + $shipping;
+                }
+                $insertorders = "INSERT INTO orders(cust_id, orderno, orderdate, payment_mode, order_value, shipping, discount, total, user_ip, payment_link, status) 
+                                                                VALUES($custid, '$orderId', '$oldcrmtimestamp', 'Credit Card', '$totalCartPrice', '$shipping', '$amtDiscount', '$total', '', '', 'Pending')";
+                
+                if ($oldCrmConn->query($insertorders))
+                {
+                    $lastid = $oldCrmConn->insert_id;
+                    $insertToOldCrm = "INSERT INTO tbtcustomer(cid,fname, lname, email, mobile, password) VALUES($custid, '$fname', '$lname', '$email', '$phone', ' ')";
+                    if ($oldCrmConn->query($insertToOldCrm) === true)
+                    {
+
+                    }
+                    else
+                    {
+                        echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+                    }
+                    
+                    $selectCartProduct = $conn->prepare("SELECT * FROM ogcart WHERE userId= '$userid' && wishlist=0");
+                    $selectCartProduct->execute();
+                    while ($row = $selectCartProduct->fetch(PDO::FETCH_ASSOC))
+                    {
+                        $productCode = $row['productCode'];
+                        $strengthCode = $row['strengthCode'];
+                        $quantityCode = $row['quantityCode'];
+                        $quantity = $row['quantity'];
+                        $quantityPrice = $row['quantityPrice'];
+                        $totalQuantity = $row['totalQuantity'];
+                        $totalPrice = $row['totalPrice'];
+                        $total = $row['total'];
+
+                        $selectProductName = $conn->prepare("SELECT * FROM ogproduct WHERE productCode= '$productCode'");
+                        $selectProductName->execute();
+                        while ($row = $selectProductName->fetch(PDO::FETCH_ASSOC))
+                        {
+                            $productName = $row['productName'];
+                            $productCategory = $row['productCategory'];
+                        }
+
+                        $selectStrengthName = $conn->prepare("SELECT * FROM ogstrength WHERE strengthCode= '$strengthCode'");
+                        $selectStrengthName->execute();
+                        while ($row = $selectStrengthName->fetch(PDO::FETCH_ASSOC))
+                        {
+                            $strengthName = $row['strengthName'];
+                        }
+                        $selectQuantity = $conn->prepare("SELECT * FROM ogquantity WHERE quantityCode= '$quantityCode'");
+                        $selectQuantity->execute();
+                        while ($row = $selectQuantity->fetch(PDO::FETCH_ASSOC))
+                        {
+                            $quantityName = $row['quantity'];
+                        }
+
+                        $insertCategory = "INSERT INTO `category` (`title`, `image_src`, `status`) VALUES ('$productCategory', 'sfsf', '1');";
+                        if ($oldCrmConn->query($insertCategory))
+                        {
+                            $newcategoryid = $oldCrmConn->insert_id;
+                        }
+
+                        $insertProduct = "INSERT INTO `subcategory`(`id`, `productname`, `image`, `price`, `packageSize`, `description`, `status`) VALUES ('$newcategoryid', '$productName', 'sdsd', 5, 'ff', 'ff', '3')";
+                        if ($oldCrmConn->query($insertProduct))
+                        {
+                            $newproductsid = $oldCrmConn->insert_id;
+                        }
+
+                        $insertStrength = "INSERT INTO `pdetails`(`cid`, `product_id`, `strength`, `packaging_method`) VALUES ('$newcategoryid', '$newproductsid','$strengthName', 'pill')";
+                        if ($oldCrmConn->query($insertStrength))
+                        {
+                            $newstrengthid = $oldCrmConn->insert_id;
+                        }
+
+                        $insertToOldCrm = "INSERT INTO order_details(order_id, cid, pid, strength, qty, price) VALUES($lastid, $newcategoryid, $newproductsid, $newstrengthid, $quantity*$totalQuantity, $quantityPrice)";
+                        if ($oldCrmConn->query($insertToOldCrm) === true)
+                        {
+
+                        }
+                        else
+                        {
+                            echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+                        }
+
+                        $newStrength = $productName . " " . $strengthName;
+                        $getOldData = "SELECT * FROM pdetails WHERE strength LIKE '%$newStrength%'";
+                        $oldProductResult = $oldCrmConn->query($getOldData);
+                        while ($productRow = $oldProductResult->fetch_assoc())
+                        {
+                            $strengthid = $productRow['pid'];
+                        }
+
+                        $getOldData1 = "SELECT * FROM tblproductdetails WHERE strength='$strengthid' and qty='$quantityName' limit 1";
+                        $oldProductResult = $oldCrmConn->query($getOldData1);
+                        while ($productRow1 = $oldProductResult->fetch_assoc())
+                        {
+                            $catids = $productRow1['cid'];
+                            $productids = $productRow1['pid'];
+                            $strengthids = $productRow1['strength'];
+
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    echo "Error: " . $insertorders . "<br>" . $oldCrmConn->error;
+                }
+            }
+            else
+            {
+                echo "Error: " . $insertToOldCrm . "<br>" . $oldCrmConn->error;
+            }
+
+        }
+        else
+        {
+            echo "Not Insert Address";
+        }
+
+        if ($insertProduct)
+        {
+            $allProductPrice = $conn->prepare("SELECT SUM(total) AS totalPrice FROM ogcart WHERE userID='$userid' && wishlist=0");
+            $allProductPrice->execute();
+            while ($priceTotal = $allProductPrice->fetch(PDO::FETCH_ASSOC))
+            {
+                $totalCartPrice = $priceTotal['totalPrice'];
+                $select_user_coupan = $conn->prepare("SELECT coupon FROM ogcustomer WHERE userid='$userid'");
+                $select_user_coupan->execute();
+                while ($coupan = $select_user_coupan->fetch(PDO::FETCH_ASSOC))
+                {
+                    $coupon = $coupan['coupon'];
+                }
+                if ($coupon == "")
+                {
+                    $amtDiscount = 0;
+                }
+                else
+                {
+                    $selectCouponData = $conn->prepare("SELECT * FROM coupons WHERE code='$coupon'");
+                    $selectCouponData->execute();
+                    while ($coupanData = $selectCouponData->fetch(PDO::FETCH_ASSOC))
+                    {
+
+                        $code = $coupanData['code'];
+
+                        $discount = $coupanData['discount'];
+                        $orderAmount = $coupanData['minOrderAmount'];
+                        $maxAmount = $coupanData['maxDiscountAmount'];
+                        $disType = $coupanData['isTypePercentage'];
+                        if ($disType == 1)
+                        {
+                            $amtDiscount = $totalCartPrice * ($discount / 100);
+                            if ($amtDiscount > $maxAmount)
+                            {
+                                $amtDiscount = $maxAmount;
+                            }
+                        }
+                        else
+                        {
+                            $amtDiscount = $discount;
+                        }
+
+                    }
+                }
+
+                if ($sprice > 0 && $sprice <= 55)
+                {
+                    $sshipping = 35;
+                }
+                elseif ($sprice >= 56 && $sprice < 250)
+                {
+                    $sshipping = 25;
+                }
+                elseif ($sprice >= 250)
+                {
+                    $sshipping = 0;
+                }
+
+                if ($gprice > 0 && $gprice <= 55)
+                {
+                    $gshipping = 35;
+                }
+                elseif ($gprice >= 56 && $gprice < 250)
+                {
+                    $gshipping = 25;
+                }
+                elseif ($gprice >= 250)
+                {
+                    $gshipping = 0;
+                }
+
+                if ($uprice > 0 && $uprice <= 55)
+                {
+                    $ushipping = 35;
+                }
+                elseif ($uprice >= 56 && $uprice < 250)
+                {
+                    $ushipping = 25;
+                }
+                elseif ($uprice >= 250)
+                {
+                    $ushipping = 0;
+                }
+
+                $shipping = $sshipping + $gshipping + $ushipping;
+                $total = $totalCartPrice - $amtDiscount;
+                $total = $total + $shipping;
+            }
+
+            $insertOrderDetails = $conn->prepare("INSERT INTO orderdetails(orderid, userid, subtotal, dcharge, discount, total, paymentMethod, paidAmount, paymentStatus, orderStatus, orderDate, addressId, coupon,fname, lname, email, phone, addressline1, addressline2, city, country, state, postalcode) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $insertOrderDetails->execute([$orderId, $userid, $totalCartPrice, $shipping, $amtDiscount, $total, 'paypal', '0', 'Unpaid', 'Draft', $timestamp, $addressId, $code, $fname, $lname, $email, $phone, $addressline1, $addressline2, $cityName, $countryName, $stateName, $postalCode, ]);
+            if ($insertOrderDetails)
+            {
+                $deleteFromCart = $conn->prepare("DELETE FROM ogcart WHERE userId=? && wishlist=0");
+                $deleteFromCart->execute([$userid]);
+
+                $updateCoupon = $conn->prepare("UPDATE ogcustomer SET coupon=NULL WHERE userid=?");
+                $updateCoupon->execute([$userid]);
+
+                echo json_encode(array(
+                    "invid" => $orderId
+                ));
+
+                $_SESSION['userLogin'] = "True";
+                $_SESSION['userid'] = $userid;
+
+                $msg = '
+<table style="max-width:670px; width: 100%; margin:0 auto;background-color:#fff;border-radius:3px;">
+    <tbody>
+        <tr>
+            <td style="background-color:#fefbfa" bgcolor="#fefbfa" align="left">
+                <table width="100%" cellspacing="0" cellpadding="0" style="padding:3px;border:1px solid #0a9d7b">
+                    <tbody>
+                        <tr>
+                            <td style="display:flex;width:60%">
+                                <img src="https://ci4.googleusercontent.com/proxy/VuLIywGTQ2ygi6pupn_zNwpt0WB6vras8nWRllC45_5-jpNrVoJyG8D7uY7qng-Tm5tFU3sDd-Fi7egjIrAHRJF8YEhAp74n46pRkkwX90k=s0-d-e1-ft#https://oneglobalpharma.com/assets/img/global-pharma-logo.png" alt="" width="130" style="display:block" class="CToWUd">
+                            </td>
+                            <td style="text-align:center;width:40%;background:#0a9d7b;color:#fff">
+                                <p style="font-weight:600;font-size:14px">#'.$orderId.'</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        
+        <tr>
+         <td align="left" bgcolor="#87c6ec" style="background-color:#87c6ec">
+            <table cellpadding="0" cellspacing="0" width="100%">
+               <tbody>
+                  <tr>
+                     <td width="560" align="center" valign="top">
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                           <tbody>
+                              <tr>
+                                 <td align="center" style="background-color:#ffffff;border:1px solid #0a9d7b;margin-top:52px;padding:0 19px">
+                                    <p style="text-align:left;font-weight:600">Hello '.$fname.'</p>
+                                    <p style="text-align:left">Thank you for your order. Your Invoice Id is #'.$orderId.'.  You will soon receive the payment link and invoice copy of $' . $total . ' for your order. You can review your order as mentioned below and if want to make any changes, kindly call our representative at <?php  echo $_SESSION['phone1'] ?> or email us at admin@Newlands Pharmacy.com.</p>
+
+                                    <p style="text-align:center"><b>Note: Name on bank statement for your order of $' . $total . ' will be Newlands Pharmacy. This name will also appear on your  credit or debit card statement.</b></p>
+
+                                    <!--<img src="https://i.ibb.co/c22JTb2/clearance.png" width="150px">-->
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </td>
+      </tr>
+        
+      <tr>
+        <td>
+            <div style="padding: 16px 14px;background: #ffffff;color: #000;border: 1px solid #eeebeb;border-bottom: 0px;">
+                <table style="width: 100%; ">
+                    <tbody>
+                        <tr style=" vertical-align: baseline; font-family: Lato,Arial,Helvetica,sans-serif;">
+                            <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #000;/* text-align: center; */">
+                                <p style="margin: 0;">Contact Details</p>
+                                <p style="margin: 0;margin-top: 5px;"><b>' . $fname . ' ' . $lname . '</b></p>
+                                <p style="margin: 0;margin-top: 1px;font-size: 15px;"><b>' . $phone . '</b></p>
+                                <p style="margin: 0;margin-top: 0px;font-size: 15px;"><b>' . $email . '</b></p>
+                            </td>
+                            <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #000;padding-left: 122px;">
+                                <p style="margin: 0;">Shipping Details</p>
+                                <p style="margin: 0;margin-top: 2px;font-size: 15px;"><b>' . $addressline1 . ' ' . $addressline2 . '</b></p>
+                                <p style="margin-top: 0px;font-size: 15px;"><b>Mumbai, Maharashtra(400072) India ' . $cityName . ', ' . $stateName . '(' . $postalCode . ')' . $countryName . '</b></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding: 14px 12px;border-top: 1px solid #ece7e7;border-left: 1px solid #f0efef;border-right: 1px solid #f0efef;">
+                <table style=" width: 100%; ">
+                ';
+
+                $allProduct = $conn->prepare("SELECT * FROM ogorderproduct WHERE orderid='$orderId'");
+                $allProduct->execute();
+                while ($ogproduct = $allProduct->fetch(PDO::FETCH_ASSOC))
+                {
+                    $productCode = $ogproduct['productCode'];
+                    $productName = $ogproduct['productName'];
+                    $strength = $ogproduct['strength'];
+                    $quantity = $ogproduct['quantity'];
+                    $price = $ogproduct['totalPrice'];
+                    $selectProductImage = $conn->prepare("SELECT productImage FROM `ogproduct` WHERE productCode=?");
+                    $selectProductImage->execute([$productCode]);
+                    while ($productImage = $selectProductImage->fetch(PDO::FETCH_ASSOC))
+                    {
+                        $productImages = $productImage['productImage'];
+                    }
+                    $msg .= '<tr>
+                        <td style=" width: 16%; text-align:center; border-bottom: 1px solid #eee;">
+                            <img style=" width: 55%; margin-top: 7px; " src="https://myglobal1.gumlet.io/onglobaladmincrm/' . $productImages . '?w=71&extract=150,220,450,330">  
+                        </td>
+                        <td style=" width: 54%; border-bottom: 1px solid #eee;">
+                            <p style=" font-weight: 800; font-family: Lato,Arial,Helvetica,sans-serif; margin: 0; ">' . $productName . ' ' . $strength . '</p>
+                            <p style=" font-family: Lato,Arial,Helvetica,sans-serif; margin: 0; margin-top: 4px; "><b>Strength: </b>' . $strength . '  <b>Quantity: </b>' . $quantity . '</p>
+                        </td>
+                        <td style=" width: 30%; border-bottom: 1px solid #eee;">
+                            <p style="font-weight: 800;font-family: Lato,Arial,Helvetica,sans-serif;margin: 0;text-align: right;width: 100%;">$' . $price . '</p>
+                        </td>
+                    </tr>
+                    ';
+                }
+                $msg .= '
+                </table>
+            </div>
+            
+            <div style="padding: 10px; background: #7287ff; color: #fff; ">
+                <table style="width: 100%; ">
+                <tr style=" vertical-align: baseline; font-family: Lato,Arial,Helvetica,sans-serif;">
+                    <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #fff;text-align: center;">
+                        <p>Subtotal: &nbsp;&nbsp;<b style=" text-align: right;">$' . $totalCartPrice . '</b></p>
+                    </td>
+                    <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #fff;text-align: center;">
+                        <p>Shipping: &nbsp;&nbsp;<b>$' . $shipping . '</b></p>
+                    </td>
+                    <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #fff;text-align: center;">
+                        <p>Discount: &nbsp;&nbsp;<b>$' . $amtDiscount . '</b></p>
+                    </td>
+                    <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #fff;text-align: center;">
+                        <p>Total: &nbsp;&nbsp;<b>$' . $total . '</b></p>
+                    </td>
+                </tr>
+                </table>
+            </div>
+            
+           
+      <tr>
+         <td style="background-color:#f8f8f8;padding:20px!important;border:1px solid #0e810e" bgcolor="#f8f8f8" align="left">
+            <div style="padding: 16px 14px;background: #ffffff;color: #000;border: 1px solid #eeebeb;border-bottom: 0px;">
+                <table style="width: 100%; ">
+                    <tbody>
+                        <tr style=" vertical-align: baseline; font-family: Lato,Arial,Helvetica,sans-serif;">
+                            <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #000; text-align: center;">
+                                <h3 style="color:#2b3445;margin:0">24/7 assistance</h3>
+                                <p style="line-height:150%;color:#242424;margin:0">Call <a style="line-height:150%;color:#335e90" href="tel:13155154364" rel="noreferrer" target="_blank">+1 315 515
+                                       4364<br></a>Email&nbsp;<a style="color:#335e90" href="mailto:admin@oneglobalpharma.com" rel="noreferrer" target="_blank">admin@oneglobalpharma.<wbr>com</a>
+                                       or<br><a href="" style="color:#335e90" rel="noreferrer" target="_blank" data-saferedirecturl="https://www.google.com/url?q=&amp;source=gmail&amp;ust=1653471972781000&amp;usg=AOvVaw2iHdVEOv-WIpYhFXZn_hEj">Visit Newlands Pharmacy</a> for
+                                       expert assistance.
+                                    </p>
+                            </td>
+                            <td style="font-family: Lato,Arial,Helvetica,sans-serif;color: #000;padding-left: 122px;text-align: center;">
+                                <h3 style="color:#2b3445;margin:0">Our guarantee</h3>
+                                <p style="line-height:150%;color:#242424;margin:0">See our <a href="https://oneglobalpharma.com/order_return" style="color:#335e90" rel="noreferrer" target="_blank" data-saferedirecturl="https://www.google.com/url?q=https://oneglobalpharma.com/order_return&amp;source=gmail&amp;ust=1653471972781000&amp;usg=AOvVaw296SpNmfOCPKIsEU6xh9Tr">Returns and Exchanges
+                                       policy.</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </td>
+     </tr>
+      
+      
+      <tr>
+         <td>
+            <br>
+         </td>
+      </tr>
+      <tr>
+         <td align="left" bgcolor="#010101" style="background-color:#ffffff;border:1px solid #0e810e">
+            <table cellpadding="0" cellspacing="0" width="100%">
+               <tbody>
+                  <tr>
+                     <td width="560" align="center" valign="top">
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                           <tbody>
+                              <tr>
+                                 <td align="center">
+                                    <p><strong><a style="line-height:150%" href="https://oneglobalpharma.com/allmeds" rel="noreferrer" target="_blank" data-saferedirecturl="https://www.google.com/url?q=https://oneglobalpharma.com/allmeds&amp;source=gmail&amp;ust=1653471972781000&amp;usg=AOvVaw1pmhisJD7OwQA64xoVYZRn">Browse
+                                       all medicines</a></strong>
+                                    </p>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td align="center">
+                                    <p style="line-height:1;color:#000;margin:0">Global
+                                       Pharma,<br>Ohio, USA<br><br>
+                                    </p>
+                                    <p style="line-height:1;color:#000;margin:0"><a href="tel:13155154364" style="text-decoration:none" rel="noreferrer" target="_blank">+1
+                                       315 515 4364</a>
+                                    </p>
+                                    <p style="line-height:1;color:#000;margin:0"><a href="mailto:admin@oneglobalpharma.com" style="line-height:120%;text-decoration:none" rel="noreferrer" target="_blank">admin@oneglobalpharma.com</a>
+                                    </p>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td align="center">
+                                    <p style="color:#000"><em><span style="font-size:11px;line-height:150%">You are
+                                       receiving this email because you have visited our
+                                       site or ordered product from our site</span></em>
+                                    </p>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </td>
+      </tr>
+            
+            
+            
+            
+        </td>
+      </tr>
+    </tbody>
+  </table>
+                                                                ';
+
+                $emails1 = new \SendGrid\Mail\Mail();
+                $emails1->setFrom("sandeep.parekh@webenetic.com", "sandeep");
+                $emails1->setSubject("Your GlobalPharma Order Confirmation ( " . $orderId . " )");
+                $emails1->addTo($email, $fname . ' ' . $lname);
+                $emails1->addContent("text/html", $msg);
+                $apiKey = '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';
+                $sendgrid = new \SendGrid($apiKey);
+                try
+                {
+                    $response = $sendgrid->send($emails1);
+                    // print $response->statusCode() . "\n";
+                    // print_r($response->headers());
+                    // print $response->body() . "\n";
+                    
+                }
+                catch(Exception $e)
+                {
+                    echo "<pre>";
+                    echo 'Caught exception: ' . $e->getMessage() . "\n";
+                }
+
+                // $sentMail = new MailSmsOtp();
+                // $sentMail->mail($email, 'Thank You For Order.', $msg);
+                
+            }
+            else
+            {
+                echo "Fail";
+            }
+        }
+        else
+        {
+
+        }
+    }
+    else
+    {
+        echo "Not Inserted";
+    }
+}
+
+?>

@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>Form</title>
+        <link href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css' rel='stylesheet'>
+        <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css' rel='stylesheet'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/css/intlTelInput.css">
+        <link rel="stylesheet" href="main.css">
+    </head>
+        <body className='snippet-body'>
+            <div class="container-fluid mx-auto">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+                        <div class="card">
+                            <form class="form-card" onsubmit="event.preventDefault()">
+                                <div class="row justify-content-between text-left">
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">First name<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="fname" name="fname" placeholder="Enter your first name"> </div>
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">Last name<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="lname" name="lname" placeholder="Enter your last name"> 
+                                    </div>
+                                </div>
+                                <div class="row justify-content-between text-left">
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">Email<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="email" name="email" placeholder="Enter email address"> 
+                                        <label class="emailerror" style=" font-size: 12px; background: red; color: #fff; text-align: center; display: block; margin: 0 auto; position: absolute; top: 3px; left: 97px; right: 0; width: fit-content; border-radius: 4px; z-index: 3; padding: 0 11px 1px; ">Please Enter Valid Email Address</label> 
+                                        <label class="emailsuccess" style=" font-size: 12px; background: green; color: #fff; text-align: center; display: block; margin: 0 auto; position: absolute; top: 3px; left: 97px; right: 0; width: fit-content; border-radius: 4px; z-index: 3; padding: 0 11px 1px; ">Email Verified</label>
+                                    </div>
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">Phone number<span class="text-danger"> *</span></label> 
+                                        <input type="hidden" id="phonelength"> 
+                                        <input type="tel" id="phone" name="phone" style="width: 100%;"> 
+                                        <label class="phoneerror" style=" font-size: 12px; background: red; color: #fff; text-align: center; display: block; margin: 0 auto; position: absolute; top: 3px; left: 97px; right: 0; width: fit-content; border-radius: 4px; z-index: 3; padding: 0 11px 1px; ">Please Enter Valid Phone Number</label> 
+                                        <label class="phonesuccess" style=" font-size: 12px; background: green; color: #fff; text-align: center; display: block; margin: 0 auto; position: absolute; top: 3px; left: 97px; right: 0; width: fit-content; border-radius: 4px; z-index: 3; padding: 0 11px 1px; ">Phone Verified</label>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-between text-left">
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">Zip Code<span class="text-danger"> *</span></label> 
+                                        <input type="tel" id="zipcode" name="zipcode" placeholder="Zip Code"> </div>
+                                        <label class="ziperror" style=" font-size: 12px; background: red; color: #fff; text-align: center; display: block; margin: 0 auto; position: absolute; top: 3px; left: 97px; right: 0; width: fit-content; border-radius: 4px; z-index: 3; padding: 0 11px 1px; ">Please Enter Valid Phone Number</label> 
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">City<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="city" name="city" placeholder="Enter your city"> 
+                                    </div>
+                                </div>
+                                <div class="row justify-content-between text-left">
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">State<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="state" name="state" placeholder="State Code"> </div>
+                                    <div class="form-group col-sm-6 flex-column d-flex"> 
+                                        <label class="form-control-label px-3">Country<span class="text-danger"> *</span></label> 
+                                        <input type="text" id="country" name="country" placeholder="Enter your country"> 
+                                    </div>
+                                </div>
+                                <div class="row justify-content-end">
+                                    <div class="form-group col-sm-6"> <button type="submit" class="btn-block btn-primary">Submit</button> </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type='text/javascript' src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/intlTelInput.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/4.0.8/jquery.inputmask.bundle.min.js"></script>
+            <script src="main.js"></script>
+        </body>
+</html>
